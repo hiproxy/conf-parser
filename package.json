@@ -1,7 +1,7 @@
 {
   "name": "conf-parser",
   "version": "1.0.0",
-  "description": "hiproxy rewrite config file parser Edit",
+  "description": "hiproxy rewrite config file parser",
   "main": "src/index.js",
   "scripts": {
   },

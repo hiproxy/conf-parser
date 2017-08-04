@@ -36,16 +36,28 @@ Tokenizer.prototype = {
     this.readWhiteSpace();
     var char = this.source[this.index];
 
-    if (char.match(/[a-zA-Z]/)) {
-      var chars = this.readChars(function (char) {
-        return char.match(/[a-zA-Z]/);
-      });
+    if (this.isLetter(char)) {
+      var chars = this.readChars(this.isLetter);
       return {
         type: 'string',
         value: chars
       };
+    } else if (this.isDigit(char)) {
+      var chars = this.readChars(this.isDigit);
+      return {
+        type: 'number',
+        value: chars
+      };
+    } else if (char === '"') {
+      this.index++;
+      var str = this.readString();
+      this.index++;
+      return {
+        type: 'string',
+        value: str
+      }
     } else {
-      return {};
+      return null;
     }
   },
 
@@ -66,20 +78,28 @@ Tokenizer.prototype = {
     this.readChars(this.isWhitespace);
   },
 
-  isKeyword: function (x) {
-    return this.keywords.indexOf(' ' + x + ' ') >= 0;
+  readString: function () {
+    var escaped = false;
+    return this.readChars(function (char) {
+      if (char === '\\') {
+        escaped = true;
+      }
+
+      var isValid = char !== '"' || escaped;
+
+      if (escaped && char === '"') {
+        escaped = false;
+      }
+      
+      return isValid;
+    })
+  },
+
+  isLetter: function (ch) {
+    return /[a-zA-Z]/.test(ch);
   },
   isDigit: function (ch) {
     return /[0-9]/i.test(ch);
-  },
-  isId_start: function (ch) {
-    return /[a-zλ_]/i.test(ch);
-  },
-  isId: function (ch) {
-    return this.isDdStart(ch) || '?!-<>=0123456789'.indexOf(ch) >= 0;
-  },
-  isOpChar: function (ch) {
-    return '+-*/%=&|<>!'.indexOf(ch) >= 0;
   },
   isPunc: function (ch) {
     return ',;(){}[]'.indexOf(ch) >= 0;
@@ -94,7 +114,11 @@ Parser.Tokenizer = Tokenizer;
 module.exports = Parser;
 
 // test
-var source = '  abc 123 ';
+var file = require('path').join(__dirname, 'test.txt');
+var source = require('fs').readFileSync(file, 'utf-8');
 var tokenizer = new Tokenizer(source);
 
-console.log(tokenizer.next());
+var token = null;
+while (token = tokenizer.next()) {
+  console.log(token);
+}

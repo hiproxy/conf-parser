@@ -1,63 +1,57 @@
 # rewrite rules
 
-set $globalvar globalvarvalue;
-set $str str;
-set $str1 "str1";
-set $str2 'str2';
-set $number 123.65;
-set $number1 345;
-set $boolean true;
-set $varinvar var_$number;
+set $domain api.hiproxy.org;
+set $local 127.0.0.1:8800;
+set $api api;
+set $test $api.example.com;
+set $id 1234567;
 
-# base rules
-
-test.example.cc => abc.com/def/;
-http://test.example.io => http://test.example.io/test/;
-
-domain test.example.com {
-    # ssl_certificate     ./cert/hii.pack.com.crt;
-    # ssl_certificate_key ./cert/hii.pack.com.key;
-
-    proxy_set_header A bbb;
-
-    set $local 127.0.0.1:45678;
-    set $str str_domain_scope;
-
-    # 默认
-    location / {
-        set $cookie count_$number1;
-        set $str str_location_scope;
-        proxy_pass http://$local/;
-    }
-
-    # 文件
-    location /a.json {
-        proxy_pass http://$local/api/a.json;
-    }
-
-    # 目录
-    location /proj/api/ {
-        proxy_pass http://$local/api/;
-    }
+# standard rewrite url
+$domain => {
+    proxy_pass http://$local/api/mock/;
+    set $id 1234;
+    set $mock_user user_$id;
+    set_header Host $domain;
+    set_header UserID $mock_user;
+    set_header Access-Control-Allow-Origin *;
 }
 
-test.example.cn => {
-    # 默认
-    location / {
-        proxy_pass http://$local/;
+blog.hiproxy.org => {
+    set_header Access-Control-Allow-Origin *;
+
+    set $node_server 127.0.0.1:3008;
+    set $order order;
+    set $cookie1 login=true;expires=20160909;
+
+    location /$api/$order/detail {
+        proxy_pass http://$node_server/user/?domain=$domain;
+        set_header Set-Cookie userID 200908204140;
     }
 
-    # 文件
-    location /a.json {
-        proxy_pass http://$local/api/a.json;
+    location ~ /\/(usercenter|userinfo)/ {
+        set $cookie login=true;expires=20180808;
+        set $id 56789;
+
+        proxy_pass http://127.0.0.1:3008/info/;
+
+        set_cookie userID 200908204140;
+        set_cookie userName user_$id;
     }
 
-    # 目录
-    location /proj/api/ {
-        proxy_pass http://$local/api/;
+    location ~ /\/local\/(.*)(\?(.*))?/ {
+        send_file ./mock/$1.json;
     }
-}
 
-test.example.co => {
-    set $var is$number;
+    location /dev {
+        #alias /site/path/;
+        alias ./src/view/;
+        root app.html
+    }
+
+    location /multiple {
+        echo <h1>hello_echo</h1>;
+        echo <p>test echo directive</p>;
+        echo <p>finish</p>;
+    }
+
 }
