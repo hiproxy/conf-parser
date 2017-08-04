@@ -1,0 +1,47 @@
+{
+  "name": "conf-parser",
+  "version": "1.0.0",
+  "description": "hiproxy rewrite config file parser Edit",
+  "main": "src/index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiproxy/conf-parser.git"
+  },
+  "keywords": [
+    "hiproxy",
+    "config",
+    "rewrite",
+    "parser"
+  ],
+  "devDependencies": {
+    "ghooks": "^2.0.0",
+    "mocha": "^3.2.0",
+    "semistandard": "^10.0.0"
+  },
+  "config": {
+    "ghooks": {
+      "pre-commit": "npm run semistandard",
+      "pre-push": ""
+    }
+  },
+  "author": "zdying",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hiproxy/conf-parser/issues"
+  },
+  "homepage": "https://github.com/hiproxy/conf-parser#readme",
+  "semistandard": {
+    "globals": [
+      "log",
+      "args",
+      "it",
+      "describe",
+      "beforeEach",
+      "afterEach",
+      "before",
+      "after"
+    ]
+  }
+}
