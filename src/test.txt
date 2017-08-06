@@ -1,7 +1,7 @@
 ## rewrite rules
 
 set $domain "api.hiproxy.org"
-set $local 127.0.0.1:8800;
+set $local "127.0.0.1:8800";
 set $api api;
 set $test $api.example.com;
 set $id 1234567;

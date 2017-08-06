@@ -3,11 +3,9 @@
  * @author zdying
  */
 
-// { type: "punctuation", value: "{" }
-// { type: "number", value: 5 }
-// { type: "string", value: "Hello World!" }
-// { type: "keyword", value: "lambda" }
-// { type: "var", value: "a" }
+'use strict';
+
+var Input = require('./input');
 
 /**
  * Constructor
@@ -15,21 +13,24 @@
  * @param {any} source 
  */
 function Tokenizer (source) {
-  this.source = source;
-  this.index = 0;
+  this.input = new Input(source);
 }
 
 Tokenizer.prototype = {
   constructor: Tokenizer,
 
   next: function () {
-    if (this.eof()) {
-      return null;
+    var input = this.input;
+    var char = '';
+    var token = null;
+
+    if (input.eof()) {
+      return token;
     }
 
     this.readWhiteSpace();
-    var char = this.source.charAt(this.index);
-    var token = null;
+
+    char = input.peek();
 
     switch (char) {
       case '':
@@ -38,13 +39,13 @@ Tokenizer.prototype = {
 
       case '\'':
       case '"':
-        this.index++;
+        input.next();
         var str = this.readString(char);
         token = {
           type: 'string',
           value: str
         }
-        this.index++;
+        input.next();
         break;
 
       case '#':
@@ -63,7 +64,7 @@ Tokenizer.prototype = {
           type: 'express_end',
           value: char
         }
-        this.index++;
+        input.next();
         break;
       
       case '{':
@@ -71,14 +72,14 @@ Tokenizer.prototype = {
           type: 'block_start',
           value: char
         }
-        this.index++;        
+        input.next();       
         break;
       case '}':
         token = {
           type: 'block_end',
           value: char
         }
-        this.index++;        
+        input.next();   
         break;
       
       case '\r':
@@ -86,12 +87,23 @@ Tokenizer.prototype = {
         token = {
           type: 'line_terminal'
         }
-        this.index++; 
+        input.next();
         break;
+
+      case '=':
+        var arrow = this.readArrow();
+
+        if (arrow) {
+          token = {
+            type: 'arrow',
+            value: arrow
+          }
+          // input.info(input.line, input.column - 2);
+          break;
+        }
 
       default:
         var word = this.readChars(function (char) {
-          // return !/[\r\n\s\t;]/.test(char);
           return ' \n\r\t;'.indexOf(char) === -1;
         })
         token = {
@@ -108,10 +120,10 @@ Tokenizer.prototype = {
     var source = this.source;
     var char = '';
     var result = '';
+    var input = this.input;
 
-    while (pattern(char = source.charAt(this.index))) {
-      this.index++;
-      result += char;
+    while (pattern(input.peek())) {
+      result += input.next();
     }
 
     return result;
@@ -123,22 +135,36 @@ Tokenizer.prototype = {
 
   readString: function (quote) {
     var escaped = false;
+    var self = this;
 
     quote = quote || '"';
 
     return this.readChars(function (char) {
       if (char === '\\') {
         escaped = true;
-      }
-
-      var isValid = char !== quote || escaped;
-
-      if (escaped && char === quote) {
+        return true;
+      } else {
+        var isValid = char !== quote || escaped;
         escaped = false;
+
+        return isValid;
       }
-      
-      return isValid;
     })
+  },
+
+  readArrow: function () {
+    var source = this.source;
+    var input = this.input;
+    var char = input.peek();
+    var nextChar = input.peek(1);
+
+    if (nextChar === '>') {
+      input.next();
+      input.next();
+      return '=>';
+    } else {
+      return '';
+    }
   },
 
   isLetter: function (ch) {
@@ -148,14 +174,10 @@ Tokenizer.prototype = {
     return /[0-9]/i.test(ch);
   },
   isPunc: function (ch) {
-    return ',;(){}[]'.indexOf(ch) >= 0;
+    return ';(){}[]'.indexOf(ch) >= 0;
   },
   isWhitespace: function (ch) {
     return ch && ' \t'.indexOf(ch) >= 0;
-  },
-
-  eof: function () {
-    return this.index >= this.source.index;
   }
 };
 
@@ -178,10 +200,10 @@ while (token = tokenizer.next()) {
 
 var end = new Date();
 
-console.log('===================================');
+console.log('==========================================================');
 for (var i = 0, len = tokens.length; i < len; i++) {
   console.log(tokens[i]);
 }
-console.log('===================================');
+console.log('==========================================================');
 
 console.log('[', tokens.length, ']', 'tokens has been scanned in', end - start,  'ms');
