@@ -20,4 +20,3 @@ Parser.prototype = {
 };
 
 module.exports = Parser;
-

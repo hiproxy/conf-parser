@@ -8,7 +8,7 @@
 function Input (source) {
   this.source = source;
   this.index = 0;
-  this.column = 1;
+  this.column = 0;
   this.line = 1;
 }
 
@@ -20,12 +20,12 @@ Input.prototype = {
    */
   next: function () {
     var char = this.source.charAt(this.index++);
-    
+
     if (char === '\n') {
       this.line++;
       this.column = 1;
     } else {
-      this.column++;      
+      this.column++;
     }
 
     return char;
@@ -48,19 +48,19 @@ Input.prototype = {
   /**
    * print error message
    */
-  error: function (msg) {
-    throw Error('[Error] line: ' + this.line + ' column: ' + this.column + ':\n' + msg)
-  },
+  // error: function (msg) {
+  //   throw Error('[Error] line: ' + this.line + ' column: ' + this.column + ':\n' + msg);
+  // },
 
-  info: function (line, column) {
-    var lines = this.source.split('\n');
-    var line = line + ' ' + lines[line - 1];
-    var arrow = new Array(column + 1).join(' ') + '^';
+  // info: function (line, column) {
+  //   var lines = this.source.split('\n');
+  //   var lineStr = line + ' ' + lines[line - 1];
+  //   var arrowStr = new Array(column + 1).join(' ') + '^';
 
-    console.log(line);
-    console.log(arrow);
-  }
-}
+  //   console.log(lineStr);
+  //   console.log(arrowStr);
+  // }
+};
 
 module.exports = Input;
 

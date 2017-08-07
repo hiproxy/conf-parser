@@ -4,6 +4,8 @@
   "description": "hiproxy rewrite config file parser",
   "main": "src/index.js",
   "scripts": {
+    "test": "nyc mocha test/**/*.test.js --timeout 5000",
+    "report": "npm test && nyc report --reporter=lcov --reporter=html"
   },
   "repository": {
     "type": "git",

@@ -53,5 +53,4 @@ blog.hiproxy.org => {
         echo <p>test echo directive</p>;
         echo <p>finish</p>;
     }
-
 }
