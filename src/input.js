@@ -43,7 +43,7 @@ Input.prototype = {
    */
   eof: function () {
     return this.index >= this.source.length;
-  },
+  }
 
   /**
    * print error message

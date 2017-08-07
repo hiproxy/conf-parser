@@ -174,9 +174,6 @@ Tokenizer.prototype = {
 
 module.exports = Tokenizer;
 
-var tokenizer = new Tokenizer('# comment text');
-var tok = tokenizer.next();
-
 // console.log(tok);
 
 // test
