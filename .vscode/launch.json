@@ -7,8 +7,14 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "program": "${workspaceRoot}/src/tokenizer.js"
+      "name": "Parser",
+      "program": "${workspaceRoot}/src/parser.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "P",
+      "program": "${workspaceRoot}/src/p.js"
     }
   ]
 }

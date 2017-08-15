@@ -19,6 +19,12 @@ function Tokenizer (source) {
 Tokenizer.prototype = {
   constructor: Tokenizer,
 
+  keywords: [
+    'set',
+    'domain',
+    'location'
+  ],
+
   next: function () {
     var input = this.input;
     var char = '';
@@ -105,8 +111,9 @@ Tokenizer.prototype = {
 
       default:
         var word = this.readWord();
+        var isKeyword = this.keywords.indexOf(word) > -1;
         token = {
-          type: 'word',
+          type: isKeyword ? 'keyword' : 'word',
           value: word
         };
         break;
@@ -169,6 +176,10 @@ Tokenizer.prototype = {
 
   isWhitespace: function (ch) {
     return ch && ' \t'.indexOf(ch) >= 0;
+  },
+
+  eof: function () {
+    return this.input.eof();
   }
 };
 
