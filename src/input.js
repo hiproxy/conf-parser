@@ -49,16 +49,18 @@ Input.prototype = {
    * print error message
    */
   // error: function (msg) {
-  //   throw Error('[Error] line: ' + this.line + ' column: ' + this.column + ':\n' + msg);
+  //   this.info(this.line, this.column, msg);
   // },
 
-  // info: function (line, column) {
+  // info: function (line, column, msg) {
   //   var lines = this.source.split('\n');
   //   var lineStr = line + ' ' + lines[line - 1];
   //   var arrowStr = new Array(column + 1).join(' ') + '^';
 
+  //   console.log('Error: ' + msg);
   //   console.log(lineStr);
   //   console.log(arrowStr);
+  //   process.exit();
   // }
 };
 

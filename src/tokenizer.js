@@ -141,11 +141,14 @@ Tokenizer.prototype = {
 
   readString: function (quote) {
     var escaped = false;
+    // var input = this.input;
 
     return this.readWhile(function (char) {
       if (char === '\\') {
         escaped = true;
         return true;
+      // } else if (char === '\n') {
+      // input.error('字符串没有结束');
       } else {
         var isValid = char !== quote || escaped;
         escaped = false;

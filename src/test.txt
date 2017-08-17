@@ -10,7 +10,7 @@ set $id 1234567;
 
 # standard rewrite url
 $domain => {
-  proxy_pass http://$local/api/mock/;
+  proxy_pass "http://$local/api/mock/;
   set $id 1234;
   set $mock_user user_$id;
   set_header Host $domain;
