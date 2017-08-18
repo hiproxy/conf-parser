@@ -120,9 +120,9 @@ function parseCommand (command) {
 }
 
 // test
-var fs = require('fs');
-var sourceCode = fs.readFileSync(__dirname + '/test.txt');
-var rules = module.exports(sourceCode);
-console.log();
-console.log(':::AST:::');
-console.log(JSON.stringify(rules, null, 4));
+// var fs = require('fs');
+// var sourceCode = fs.readFileSync(__dirname + '/test.txt');
+// var rules = module.exports(sourceCode);
+// console.log();
+// console.log(':::AST:::');
+// console.log(JSON.stringify(rules, null, 4));
