@@ -9,10 +9,10 @@ function Transform () {
 
 Transform.prototype = {
   constructor: Transform,
-  tranform: function (AST, result) {
+  tranform: function (AST, target) {
     if (
       !AST ||
-      AST.type !== 'Block' ||
+      AST.type.indexOf('Block') === -1 ||
       !Array.isArray(AST.body) ||
       AST.body.length === 0
     ) {
@@ -21,20 +21,26 @@ Transform.prototype = {
 
     var body = AST.body;
 
-    result = result || {};
+    target = target || {};
 
     body.forEach(function (statement) {
       var type = statement.type;
 
       switch (type) {
-        case 'Simple Rule':
-          this.transformSimpleRule(result, statement);
+        case 'SimpleRule':
+          this.transformSimpleRule(target, statement);
           break;
-        case 'Call':
-          this.transformCall(result, statement);
+        case 'CallExpression':
+          this.transformCall(target, statement);
           break;
-        case 'Block':
-          this.transformBlcok(result, statement);
+        case 'VariableDeclaration':
+          this.transformSet(target, statement);
+          break;
+        case 'DomainBlock':
+          this.transformDomain(target, statement);
+          break;
+        case 'LocationBlock':
+          this.transformLocation(target, statement);
           break;
         default:
 
@@ -42,7 +48,7 @@ Transform.prototype = {
       }
     }, this);
 
-    return result;
+    return target;
   },
 
   transformSimpleRule: function (target, statement) {
@@ -62,7 +68,7 @@ Transform.prototype = {
 
   transformCall: function (target, statement) {
     var directive = statement.directive;
-    var params = statement.params.map(function (param) {
+    var params = statement.arguments.map(function (param) {
       return param.value;
     });
     var obj = {
@@ -77,28 +83,17 @@ Transform.prototype = {
     }
   },
 
-  transformBlcok: function (target, statement) {
-    var name = statement.name;
-    switch (name) {
-      case 'Domain':
-        this.transformDomain(target, statement);
-        break;
-
-      case 'Location':
-        this.transformLocation(target, statement);
-        break;
-
-      default:
-        break;
-    }
-  },
-
   transformDomain: function (target, statement) {
-    var obj = this.tranform(statement, {
+    var domain = {
       domain: statement.domain,
       directives: [],
       locations: []
-    });
+    };
+
+    // merge props/directives from `GlobalBlock`
+    this.mergeProps(domain, target);
+
+    var obj = this.tranform(statement, domain);
 
     if (Array.isArray(target.domains)) {
       target.domains.push(obj);
@@ -108,17 +103,65 @@ Transform.prototype = {
   },
 
   transformLocation: function (target, statement) {
-    var location = statement.location;
-    var obj = this.tranform(statement, {
-      location: location,
+    var location = {
+      location: statement.location,
       directives: []
-    });
+    };
+
+    // merge props/directives from `DomainBlock`
+    this.mergeProps(location, target);
+
+    var obj = this.tranform(statement, location, target);
 
     if (Array.isArray(target.locations)) {
       target.locations.push(obj);
     } else {
       target.locations = [obj];
     }
+  },
+
+  transformSet: function (target, statement) {
+    if (!target.variables) {
+      target.variables = {};
+    }
+
+    var declaration = statement.declaration;
+    var id = declaration.id.value;
+    var value = declaration.value;
+
+    if (value.length === 1) {
+      value = value[0].value;
+    } else {
+      value = value.map(function (val) {
+        return val.value;
+      });
+    }
+
+    target.variables[id] = value;
+  },
+
+  mergeProps: function (current, parent) {
+    ['directives', 'variables'].forEach(function (key) {
+      var props = parent[key];
+      var currProps = current[key];
+      var prop = '';
+
+      if (!props) {
+        return;
+      }
+
+      currProps = currProps || (current[key] = {});
+
+      if (Array.isArray(props)) {
+        current[key] = props.concat(currProps);
+      } else if (typeof props === 'object') {
+        for (prop in props) {
+          if (!(prop in currProps)) {
+            currProps[prop] = props[prop];
+          }
+        }
+      }
+    });
   }
 };
 
@@ -132,4 +175,4 @@ var ast = parser.parseToplevel();
 
 var res = new Transform().tranform(ast);
 
-console.log(JSON.stringify(res, null, 4));
+console.log(JSON.stringify(res, null, 2));

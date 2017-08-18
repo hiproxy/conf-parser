@@ -10,8 +10,6 @@ set $id 1234567;
 
 # standard rewrite url
 $domain => {
-  proxy_pass "http://$local/api/mock/";
-  set $id 1234;
   set $mock_user user_$id;
   set_header Host $domain;
   set_header UserID $mock_user;
@@ -23,7 +21,8 @@ blog.hiproxy.org => {
 
   set $node_server 127.0.0.1:3008;
   set $order order;
-  set $cookie1 login=true;expires=20160909;
+  set $cookie1 'login=true;expires=20160909';
+  set $id AbcdeF;
 
   location /$api/$order/detail {
     proxy_pass http://$node_server/user/?domain=$domain;

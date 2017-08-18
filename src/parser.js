@@ -7,14 +7,14 @@ var Tokenizer = require('./tokenizer');
 
 function Parser (source) {
   this.tokenizer = new Tokenizer(source);
+  this.input = this.tokenizer.input;
 }
 
 Parser.prototype = {
   constructor: Parser,
   parseToplevel: function () {
     var ast = {
-      type: 'Block',
-      name: 'Program',
+      type: 'GlobalBlock',
       body: []
     };
     // var tokenizer = this.tokenizer;
@@ -64,8 +64,7 @@ Parser.prototype = {
         if (firstToken.type === 'keyword' && firstToken.value === 'location') {
           // location /
           body.push({
-            type: 'Block',
-            name: 'Location',
+            type: 'LocationBlock',
             location: tokens.slice(1).map(function (token) { return token.value; }).join(' '),
             // params: tokens,
             body: block
@@ -73,8 +72,7 @@ Parser.prototype = {
         } else if (tokens[1].type === 'arrow') {
           // hiproxy.org => {
           body.push({
-            type: 'Block',
-            name: 'Domain',
+            type: 'DomainBlock',
             domain: tokens[0].value,
             // params: tokens,
             body: block
@@ -82,19 +80,11 @@ Parser.prototype = {
         } else {
           // domain hiproxy.org {
           body.push({
-            type: 'Block',
-            name: 'Domain',
+            type: 'DomainBlock',
             domain: tokens[1].value,
-            // params: tokens,
             body: block
           });
         }
-
-        // body.push({
-        //   type: 'Block',
-        //   params: tokens,
-        //   body: block
-        // });
       } else if (firstToken && firstToken.type !== 'comment') {
         call = this.parseCall(tokens);
         call && body.push(call);
@@ -149,7 +139,7 @@ Parser.prototype = {
     if (values.indexOf('=>') > -1) {
       if (values.length === 3) {
         return {
-          type: 'Simple Rule',
+          type: 'SimpleRule',
           left: name,
           right: params.pop()
         };
@@ -158,12 +148,26 @@ Parser.prototype = {
       }
     }
 
+    if (this.isSet(name)) {
+      return {
+        type: 'VariableDeclaration',
+        declaration: {
+          id: params.shift(),
+          value: params
+        }
+      };
+    }
+
     return {
-      type: 'Call',
+      type: 'CallExpression',
       directive: name ? name.value : '[Should throw a error or not?]',
       // directive: name.value,
-      params: params
+      arguments: params
     };
+  },
+
+  isSet: function (token) {
+    return token && token.value === 'set';
   }
 };
 
@@ -173,7 +177,6 @@ module.exports = Parser;
 // var file = require('path').join(__dirname, 'test.txt');
 // var source = require('fs').readFileSync(file, 'utf-8');
 // var parser = new Parser(source);
-// // var ast = parser.parseBlock();
 // var ast = parser.parseToplevel();
 
-// console.log(JSON.stringify(ast, null, 4));
+// console.log(JSON.stringify(ast, null, 2));
