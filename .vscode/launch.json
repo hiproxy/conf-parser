@@ -13,8 +13,8 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "P",
-      "program": "${workspaceRoot}/src/p.js"
+      "name": "Transform",
+      "program": "${workspaceRoot}/src/transform.js"
     }
   ]
 }

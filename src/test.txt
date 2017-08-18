@@ -3,27 +3,15 @@
 http://api.hiproxy.org/ => http://hiproxy.org/api/;
 
 set $domain "api.hiproxy.org"
-set $local "127.0.0.1:8800";
-set $api api;
-set $test $api.example.com;
-set $id 1234567;
 
 # standard rewrite url
 $domain => {
-  proxy_pass "http://$local/api/mock/;
+  proxy_pass "http://$local/api/mock/";
   set $id 1234;
-  set $mock_user user_$id;
-  set_header Host $domain;
-  set_header UserID $mock_user;
-  set_header Access-Control-Allow-Origin *;
 }
 
-blog.hiproxy.org => {
+domain blog.hiproxy.org {
   set_header Access-Control-Allow-Origin *;
-
-  set $node_server 127.0.0.1:3008;
-  set $order order;
-  set $cookie1 login=true;expires=20160909;
 
   location /$api/$order/detail {
     proxy_pass http://$node_server/user/?domain=$domain;
@@ -32,27 +20,7 @@ blog.hiproxy.org => {
 
   location ~ /\/(usercenter|userinfo)/ {
     set $cookie 'login=true;expires=20180808';
-    set $id 56789;
 
     proxy_pass http://127.0.0.1:3008/info/;
-
-    set_cookie userID 200908204140;
-    set_cookie userName user_$id;
-  }
-
-  location ~ /\/local\/(.*)(\?(.*))?/ {
-    send_file ./mock/$1.json;
-  }
-
-  location /dev {
-    # alias /site/path/;
-    alias ./src/view/;
-    root app.html
-  }
-
-  location /multiple {
-    echo "<h1>hello_echo</h1>";
-    echo "<p>test echo directive</p>";
-    echo "<p>finish</p>";
   }
 }

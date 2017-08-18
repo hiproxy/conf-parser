@@ -13,7 +13,8 @@ Parser.prototype = {
   constructor: Parser,
   parseToplevel: function () {
     var ast = {
-      type: 'Program',
+      type: 'Block',
+      name: 'Program',
       body: []
     };
     var tokenizer = this.tokenizer;
@@ -44,6 +45,7 @@ Parser.prototype = {
       block = this.parseBlock();
       return {
         type: 'Block',
+        name: 'Domain',
         params: tokens,
         body: block
       };
@@ -85,15 +87,17 @@ Parser.prototype = {
         if (firstToken.type === 'keyword' && firstToken.value === 'location') {
           // location /
           body.push({
-            type: 'Location',
-            location: tokens[1].value,
+            type: 'Block',
+            name: 'Location',
+            location: tokens.slice(1).map(function (token) { return token.value; }).join(' '),
             // params: tokens,
             body: block
           });
         } else if (tokens[1].type === 'arrow') {
           // hiproxy.org => {
           body.push({
-            type: 'Domain',
+            type: 'Block',
+            name: 'Domain',
             domain: tokens[0].value,
             // params: tokens,
             body: block
@@ -101,7 +105,8 @@ Parser.prototype = {
         } else {
           // domain hiproxy.org {
           body.push({
-            type: 'Domain',
+            type: 'Block',
+            name: 'Domain',
             domain: tokens[1].value,
             // params: tokens,
             body: block
@@ -185,10 +190,12 @@ Parser.prototype = {
   }
 };
 
-// test
-var file = require('path').join(__dirname, 'test.txt');
-var source = require('fs').readFileSync(file, 'utf-8');
-var parser = new Parser(source);
-var ast = parser.parseToplevel();
+module.exports = Parser;
 
-console.log(JSON.stringify(ast, null, 4));
+// test
+// var file = require('path').join(__dirname, 'test.txt');
+// var source = require('fs').readFileSync(file, 'utf-8');
+// var parser = new Parser(source);
+// var ast = parser.parseToplevel();
+
+// console.log(JSON.stringify(ast, null, 4));

@@ -1,0 +1,454 @@
+{
+    "type": "Block",
+    "name": "Program",
+    "body": [
+        {
+            "type": "Simple Rule",
+            "left": {
+                "type": "word",
+                "value": "http://api.hiproxy.org/"
+            },
+            "right": {
+                "type": "word",
+                "value": "http://hiproxy.org/api/"
+            }
+        },
+        {
+            "type": "Call",
+            "directive": "set",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "$domain"
+                },
+                {
+                    "type": "string",
+                    "value": "api.hiproxy.org"
+                }
+            ]
+        },
+        {
+            "type": "Call",
+            "directive": "set",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "$local"
+                },
+                {
+                    "type": "string",
+                    "value": "127.0.0.1:8800"
+                }
+            ]
+        },
+        {
+            "type": "Call",
+            "directive": "set",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "$api"
+                },
+                {
+                    "type": "word",
+                    "value": "api"
+                }
+            ]
+        },
+        {
+            "type": "Call",
+            "directive": "set",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "$test"
+                },
+                {
+                    "type": "word",
+                    "value": "$api.example.com"
+                }
+            ]
+        },
+        {
+            "type": "Call",
+            "directive": "set",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "$id"
+                },
+                {
+                    "type": "word",
+                    "value": "1234567"
+                }
+            ]
+        },
+        {
+            "type": "Block",
+            "name": "Domain",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "$domain"
+                },
+                {
+                    "type": "arrow",
+                    "value": "=>"
+                }
+            ],
+            "body": [
+                {
+                    "type": "Call",
+                    "directive": "proxy_pass",
+                    "params": [
+                        {
+                            "type": "string",
+                            "value": "http://$local/api/mock/"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "$id"
+                        },
+                        {
+                            "type": "word",
+                            "value": "1234"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "$mock_user"
+                        },
+                        {
+                            "type": "word",
+                            "value": "user_$id"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set_header",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "Host"
+                        },
+                        {
+                            "type": "word",
+                            "value": "$domain"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set_header",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "UserID"
+                        },
+                        {
+                            "type": "word",
+                            "value": "$mock_user"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set_header",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "Access-Control-Allow-Origin"
+                        },
+                        {
+                            "type": "word",
+                            "value": "*"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "Block",
+            "name": "Domain",
+            "params": [
+                {
+                    "type": "word",
+                    "value": "blog.hiproxy.org"
+                },
+                {
+                    "type": "arrow",
+                    "value": "=>"
+                }
+            ],
+            "body": [
+                {
+                    "type": "Call",
+                    "directive": "set_header",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "Access-Control-Allow-Origin"
+                        },
+                        {
+                            "type": "word",
+                            "value": "*"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "$node_server"
+                        },
+                        {
+                            "type": "word",
+                            "value": "127.0.0.1:3008"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "$order"
+                        },
+                        {
+                            "type": "word",
+                            "value": "order"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "set",
+                    "params": [
+                        {
+                            "type": "word",
+                            "value": "$cookie1"
+                        },
+                        {
+                            "type": "word",
+                            "value": "login=true"
+                        }
+                    ]
+                },
+                {
+                    "type": "Call",
+                    "directive": "expires=20160909",
+                    "params": []
+                },
+                {
+                    "type": "Block",
+                    "name": "Location",
+                    "location": "/$api/$order/detail",
+                    "body": [
+                        {
+                            "type": "Call",
+                            "directive": "proxy_pass",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "http://$node_server/user/?domain=$domain"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "set_header",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "Set-Cookie"
+                                },
+                                {
+                                    "type": "word",
+                                    "value": "userID"
+                                },
+                                {
+                                    "type": "word",
+                                    "value": "200908204140"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Block",
+                    "name": "Location",
+                    "location": "~",
+                    "body": [
+                        {
+                            "type": "Call",
+                            "directive": "set",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "$cookie"
+                                },
+                                {
+                                    "type": "string",
+                                    "value": "login=true;expires=20180808"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "set",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "$id"
+                                },
+                                {
+                                    "type": "word",
+                                    "value": "56789"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "proxy_pass",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "http://127.0.0.1:3008/info/"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "set_cookie",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "userID"
+                                },
+                                {
+                                    "type": "word",
+                                    "value": "200908204140"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "set_cookie",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "userName"
+                                },
+                                {
+                                    "type": "word",
+                                    "value": "user_$id"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Block",
+                    "name": "Location",
+                    "location": "~",
+                    "body": [
+                        {
+                            "type": "Call",
+                            "directive": "send_file",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "./mock/$1.json"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Block",
+                    "name": "Location",
+                    "location": "/dev",
+                    "body": [
+                        {
+                            "type": "Call",
+                            "directive": "# alias /site/path/;",
+                            "params": []
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "alias",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "./src/view/"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "root",
+                            "params": [
+                                {
+                                    "type": "word",
+                                    "value": "app.html"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Block",
+                    "name": "Location",
+                    "location": "/multiple",
+                    "body": [
+                        {
+                            "type": "Call",
+                            "directive": "echo",
+                            "params": [
+                                {
+                                    "type": "string",
+                                    "value": "<h1>hello_echo</h1>"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "echo",
+                            "params": [
+                                {
+                                    "type": "string",
+                                    "value": "<p>test echo directive</p>"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "Call",
+                            "directive": "echo",
+                            "params": [
+                                {
+                                    "type": "string",
+                                    "value": "<p>finish</p>"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

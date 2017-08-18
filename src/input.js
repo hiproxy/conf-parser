@@ -43,25 +43,25 @@ Input.prototype = {
    */
   eof: function () {
     return this.index >= this.source.length;
-  }
+  },
 
   /**
    * print error message
    */
-  // error: function (msg) {
-  //   this.info(this.line, this.column, msg);
-  // },
+  error: function (msg) {
+    this.info(this.line, this.column, msg);
+  },
 
-  // info: function (line, column, msg) {
-  //   var lines = this.source.split('\n');
-  //   var lineStr = line + ' ' + lines[line - 1];
-  //   var arrowStr = new Array(column + 1).join(' ') + '^';
+  info: function (line, column, msg) {
+    var lines = this.source.split('\n');
+    var lineStr = line + ' ' + lines[line - 1];
+    var arrowStr = new Array(column + 1).join(' ') + '^';
 
-  //   console.log('Error: ' + msg);
-  //   console.log(lineStr);
-  //   console.log(arrowStr);
-  //   process.exit();
-  // }
+    console.log('Error: ' + msg);
+    console.log(lineStr);
+    console.log(arrowStr);
+    process.exit();
+  }
 };
 
 module.exports = Input;
