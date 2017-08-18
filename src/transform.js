@@ -94,12 +94,10 @@ Transform.prototype = {
   },
 
   transformDomain: function (target, statement) {
-    var params = statement.params;
     var obj = this.tranform(statement, {
-      domain: params[0].type === 'keyword' ? params[1].value : params[0].value,
-      commands: [],
-      locations: [],
-      props: {}
+      domain: statement.domain,
+      directives: [],
+      locations: []
     });
 
     if (Array.isArray(target.domains)) {
@@ -113,8 +111,7 @@ Transform.prototype = {
     var location = statement.location;
     var obj = this.tranform(statement, {
       location: location,
-      directives: [],
-      props: {}
+      directives: []
     });
 
     if (Array.isArray(target.locations)) {

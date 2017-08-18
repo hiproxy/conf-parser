@@ -17,54 +17,30 @@ Parser.prototype = {
       name: 'Program',
       body: []
     };
-    var tokenizer = this.tokenizer;
-    var statement = null;
+    // var tokenizer = this.tokenizer;
+    // var statement = null;
 
-    while (!tokenizer.eof()) {
-      statement = this.parseStatement();
-      if (statement) {
-        ast.body.push(statement);
-      }
-    }
+    // while (!tokenizer.eof()) {
+    //   statement = this.parseStatement();
+    //   if (statement) {
+    //     ast.body.push(statement);
+    //   }
+    // }
+
+    ast.body = this.parseBlock();
 
     return ast;
-  },
-
-  parseStatement: function () {
-    var block = null;
-    var tokens = this.readStatementTokens();
-
-    if (tokens.length === 0) {
-      return null;
-    }
-
-    var token = tokens.pop();
-    var type = token.type;
-
-    if (type === 'block_start') {
-      block = this.parseBlock();
-      return {
-        type: 'Block',
-        name: 'Domain',
-        params: tokens,
-        body: block
-      };
-    } else if (tokens.length && tokens[0].type !== 'comment') {
-      return this.parseCall(tokens);
-    } else {
-      return null;
-    }
   },
 
   parseBlock: function () {
     var tokenizer = this.tokenizer;
     var tokens = null;
-    var token = null;
+    var lastToken = null;
+    var firstToken = null;
     var type = '';
     var body = [];
     var block = null;
     var call = null;
-    var firstToken = null;
 
     while (!tokenizer.eof()) {
       tokens = this.readStatementTokens();
@@ -73,9 +49,10 @@ Parser.prototype = {
         continue;
       }
 
-      token = tokens.pop();
-      type = token.type;
+      lastToken = tokens.pop();
       firstToken = tokens[0];
+
+      type = lastToken.type;
 
       if (type === 'block_end') {
         break;
@@ -118,7 +95,7 @@ Parser.prototype = {
         //   params: tokens,
         //   body: block
         // });
-      } else {
+      } else if (firstToken && firstToken.type !== 'comment') {
         call = this.parseCall(tokens);
         call && body.push(call);
       }
@@ -196,6 +173,7 @@ module.exports = Parser;
 // var file = require('path').join(__dirname, 'test.txt');
 // var source = require('fs').readFileSync(file, 'utf-8');
 // var parser = new Parser(source);
+// // var ast = parser.parseBlock();
 // var ast = parser.parseToplevel();
 
 // console.log(JSON.stringify(ast, null, 4));
