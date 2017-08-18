@@ -9,7 +9,15 @@ function Transform () {
 
 Transform.prototype = {
   constructor: Transform,
-  tranform: function (AST, target) {
+  transform: function (AST) {
+    var tree = this._transform(AST);
+
+    this.mergeProps(tree);
+
+    return this.flatten(tree);
+  },
+
+  _transform: function (AST, target) {
     if (
       !AST ||
       AST.type.indexOf('Block') === -1 ||
@@ -90,10 +98,7 @@ Transform.prototype = {
       locations: []
     };
 
-    // merge props/directives from `GlobalBlock`
-    this.mergeProps(domain, target);
-
-    var obj = this.tranform(statement, domain);
+    var obj = this._transform(statement, domain);
 
     if (Array.isArray(target.domains)) {
       target.domains.push(obj);
@@ -108,10 +113,7 @@ Transform.prototype = {
       directives: []
     };
 
-    // merge props/directives from `DomainBlock`
-    this.mergeProps(location, target);
-
-    var obj = this.tranform(statement, location, target);
+    var obj = this._transform(statement, location);
 
     if (Array.isArray(target.locations)) {
       target.locations.push(obj);
@@ -137,10 +139,24 @@ Transform.prototype = {
       });
     }
 
+    value = this.replaceVar(value, target.variables);
+
     target.variables[id] = value;
   },
 
-  mergeProps: function (current, parent) {
+  mergeProps: function (target) {
+    var domains = target.domains;
+
+    domains.forEach(function (domain) {
+      this.merge(domain, target);
+
+      domain.locations.forEach(function (location) {
+        this.merge(location, domain)
+      }, this)
+    }, this);
+  },
+
+  merge: function (current, parent) {
     ['directives', 'variables'].forEach(function (key) {
       var props = parent[key];
       var currProps = current[key];
@@ -162,6 +178,102 @@ Transform.prototype = {
         }
       }
     });
+  },
+
+  flatten: function (tree) {
+    var result = {};
+    var variables = tree.variables;
+
+    this.parseBaseRule(tree);
+
+    tree.domains.forEach(function (curr) {
+      curr.domain = this.replaceVar(curr.domain, variables);
+      result[curr.domain] = curr;
+    }, this);
+
+    return result;
+  },
+
+  parseBaseRule: function (tree) {
+    // {
+    //   "source": "http://api.hiproxy.org/",
+    //   "target": "http://hiproxy.org/api/"
+    // }
+    
+    var domains = tree.domains;
+    var baseRules = tree.baseRules;
+
+    baseRules.forEach(function (rule) {
+      var arr = rule.source.split('//');
+      var hostAndPath = (arr[1] || arr[0]).split('/');
+      var path = hostAndPath[1] || '';
+      var host = hostAndPath[0];
+
+      var domain = {
+        domain: host,
+        locations: [
+          {
+            location: '/' + path,
+            directives: [
+              {
+                "directive": "proxy_pass",
+                "params": [rule.target]
+              }
+            ]
+          }
+        ]
+      };
+
+      domains.push(domain);
+    });
+  },
+
+  /**
+   * Replace variables in a value
+   *
+   * @param {String|Array|Object} str
+   * @param {Object} source
+   * @returns {*}
+   */
+  replaceVar: function (str, source) {
+    if (str == null) {
+      return str;
+    }
+
+    var strType = typeof str;    
+    var replace = function (str) {
+      if (typeof str !== 'string') {
+        return this.replaceVar(str, source);
+      }
+
+      return str.replace(/\$[\w\d_]+/g, function (match) {
+        var val = source[match];
+
+        if (val !== undefined) {
+          return val;
+        } else {
+          return match;
+        }
+      });
+    }.bind(this);
+
+    if (strType === 'string') {
+      str = replace(str);
+    } else if (strType === 'array') {
+      str = str.map(function (string) {
+        return replace(string);
+      });
+    } else if (strType === 'object') {
+      for (var strKey in str) {
+        str[strKey] = replace(str[strKey]);
+      }
+    }
+
+    return str;
+  },
+
+  resolveVariables: function (tree) {
+
   }
 };
 
@@ -173,6 +285,6 @@ var Parser = require('./parser.js');
 var parser = new Parser(source);
 var ast = parser.parseToplevel();
 
-var res = new Transform().tranform(ast);
+var res = new Transform().transform(ast);
 
 console.log(JSON.stringify(res, null, 2));

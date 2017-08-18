@@ -2,7 +2,7 @@
 
 http://api.hiproxy.org/ => http://hiproxy.org/api/;
 
-set $domain "api.hiproxy.org"
+set $domain "docs.hiproxy.org"
 set $local "127.0.0.1:8800";
 set $api api;
 set $test $api.example.com;
@@ -25,6 +25,8 @@ blog.hiproxy.org => {
   set $id AbcdeF;
 
   location /$api/$order/detail {
+    set $a 1;
+    set $b bbb_$a;
     proxy_pass http://$node_server/user/?domain=$domain;
     set_header Set-Cookie userID 200908204140;
   }
