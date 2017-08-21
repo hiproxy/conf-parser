@@ -26,9 +26,11 @@ blog.hiproxy.org => {
 
   location /$api/$order/detail {
     set $a 1;
+    # set $id 445566;
     set $b bbb_$a;
+    set $c ccc_$id;
     proxy_pass http://$node_server/user/?domain=$domain;
-    set_header Set-Cookie userID 200908204140;
+    set_header Set-Cookie userID 200908204140_$id;
   }
 
   location ~ /\/(usercenter|userinfo)/ {

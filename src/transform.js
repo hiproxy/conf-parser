@@ -148,10 +148,20 @@ Transform.prototype = {
     var domains = target.domains;
 
     domains.forEach(function (domain) {
+      // merge variables from `GlobalBlock`
       this.merge(domain, target);
 
+      // replace variables    
+      domain.variables = this.replaceVar(domain.variables, domain.variables);
+      this.replaceVar(domain, domain.variables, ['variables', 'locations']);
+
       domain.locations.forEach(function (location) {
-        this.merge(location, domain)
+        // merge variables from `DomainBlock`  
+        this.merge(location, domain);
+
+        // replace variables
+        location.variables = this.replaceVar(location.variables, location.variables);
+        this.replaceVar(location, location.variables);
       }, this)
     }, this);
   },
@@ -233,14 +243,19 @@ Transform.prototype = {
    *
    * @param {String|Array|Object} str
    * @param {Object} source
+   * @param {Array} [exclude]
    * @returns {*}
    */
-  replaceVar: function (str, source) {
+  replaceVar: function (str, source, exclude) {
     if (str == null) {
       return str;
     }
 
-    var strType = typeof str;    
+    if (!Array.isArray(exclude)) {
+      exclude = [];
+    }
+
+    var strType = typeof str;   
     var replace = function (str) {
       if (typeof str !== 'string') {
         return this.replaceVar(str, source);
@@ -265,7 +280,9 @@ Transform.prototype = {
       });
     } else if (strType === 'object') {
       for (var strKey in str) {
-        str[strKey] = replace(str[strKey]);
+        if (exclude.indexOf(strKey) === -1) {
+          str[strKey] = replace(str[strKey]);          
+        }
       }
     }
 
