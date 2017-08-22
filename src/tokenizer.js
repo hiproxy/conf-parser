@@ -142,12 +142,11 @@ Tokenizer.prototype = {
   readString: function (quote) {
     var escaped = false;
     var input = this.input;
-
-    return this.readWhile(function (char) {
+    var str = this.readWhile(function (char) {
       if (char === '\\') {
         escaped = true;
         return true;
-      } else if (char === '\n' || char === ';') {
+      } else if ('\n\r'.indexOf(char) !== -1) {
         input.error('Unterminated string constant');
       } else {
         var isValid = char !== quote || escaped;
@@ -156,6 +155,12 @@ Tokenizer.prototype = {
         return isValid;
       }
     });
+
+    if (input.eof() && input.peek(-1) !== quote) {
+      input.error('Unterminated string constant');
+    }
+
+    return str;
   },
 
   readWord: function () {

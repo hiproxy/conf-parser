@@ -144,7 +144,7 @@ Parser.prototype = {
           right: params.pop()
         };
       } else {
-        throw Error('Simple Rule syntax error');
+        this.input.error('Simple Rule syntax error');
       }
     }
 

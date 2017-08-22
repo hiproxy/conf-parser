@@ -58,8 +58,9 @@ Input.prototype = {
     var lines = this.source.split('\n');
     var lineBefore = lines[line - 2];
     var lineAfter = lines[line];
-    var lineStr = this.getLineNumber(line, line + 1, '>'.red) + lines[line - 1];
-    var arrowStr = this.getLineNumber('', line + 1, '  ') + new Array(column).join(' ') + '^'.red;
+    var maxLen = String(line + (lineAfter != null ? 1 : 0)).length;
+    var lineStr = this.getLineNum(line, maxLen, '> '.red) + lines[line - 1];
+    var arrowStr = this.getLineNum('', maxLen, '  ') + new Array(column).join(' ') + '^'.red;
 
     // 25 | set $domain hiproxy.org;
     // 26 | set $string "hiiproxy;
@@ -68,19 +69,26 @@ Input.prototype = {
 
     var error = [
       'Error: '.bold.red + msg,
-      lineBefore != null ? this.getLineNumber(line - 1, line + 1, ' ') + lineBefore : '',
+      '',
+      lineBefore != null ? this.getLineNum(line - 1, maxLen, '  ') + lineBefore : '',
       lineStr,
       arrowStr,
-      lineAfter != null ? this.getLineNumber(line + 1, line + 1, ' ') + lineAfter : ''
+      lineAfter != null ? this.getLineNum(line + 1, maxLen, '  ') + lineAfter : '',
+      ''
     ];
 
     console.log(error.join('\n'));
     process.exit();
   },
 
-  getLineNumber: function (num, max, prefix) {
-    var maxLen = String(max || num).length + 1;
-    return (prefix || '').red + String(Math.pow(10, maxLen) + num).slice(1).replace(/^0+/, ' ').gray + ' | '.gray;
+  getLineNum: function (num, length, prefix) {
+    var delta = length - String(num).length;
+    if (delta > 0) {
+      num = new Array(delta + 1).join(' ') + num;
+    } else {
+      num += '';
+    }
+    return (prefix || '').red + num.blue + ' | '.gray;
   }
 };
 
