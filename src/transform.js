@@ -151,18 +151,18 @@ Transform.prototype = {
       // merge variables from `GlobalBlock`
       this.merge(domain, target);
 
-      // replace variables    
+      // replace variables
       domain.variables = this.replaceVar(domain.variables, domain.variables);
       this.replaceVar(domain, domain.variables, ['variables', 'locations']);
 
       domain.locations.forEach(function (location) {
-        // merge variables from `DomainBlock`  
+        // merge variables from `DomainBlock`
         this.merge(location, domain);
 
         // replace variables
         location.variables = this.replaceVar(location.variables, location.variables);
         this.replaceVar(location, location.variables);
-      }, this)
+      }, this);
     }, this);
   },
 
@@ -209,7 +209,7 @@ Transform.prototype = {
     //   "source": "http://api.hiproxy.org/",
     //   "target": "http://hiproxy.org/api/"
     // }
-    
+
     var domains = tree.domains;
     var baseRules = tree.baseRules;
 
@@ -226,8 +226,8 @@ Transform.prototype = {
             location: '/' + path,
             directives: [
               {
-                "directive": "proxy_pass",
-                "params": [rule.target]
+                'directive': 'proxy_pass',
+                'params': [rule.target]
               }
             ]
           }
@@ -255,7 +255,7 @@ Transform.prototype = {
       exclude = [];
     }
 
-    var strType = typeof str;   
+    var strType = typeof str;
     var replace = function (str) {
       if (typeof str !== 'string') {
         return this.replaceVar(str, source);
@@ -281,7 +281,7 @@ Transform.prototype = {
     } else if (strType === 'object') {
       for (var strKey in str) {
         if (exclude.indexOf(strKey) === -1) {
-          str[strKey] = replace(str[strKey]);          
+          str[strKey] = replace(str[strKey]);
         }
       }
     }
