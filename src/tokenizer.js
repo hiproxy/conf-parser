@@ -147,8 +147,8 @@ Tokenizer.prototype = {
       if (char === '\\') {
         escaped = true;
         return true;
-      } else if (char === '\n') {
-        input.error('字符串没有结束');
+      } else if (char === '\n' || char === ';') {
+        input.error('Unterminated string constant');
       } else {
         var isValid = char !== quote || escaped;
         escaped = false;
@@ -191,26 +191,26 @@ module.exports = Tokenizer;
 // console.log(tok);
 
 // test
-// var file = require('path').join(__dirname, 'test.txt');
-// var source = require('fs').readFileSync(file, 'utf-8');
-// var tokenizer = new Tokenizer(source);
+var file = require('path').join(__dirname, 'test.txt');
+var source = require('fs').readFileSync(file, 'utf-8');
+var tokenizer = new Tokenizer(source);
 
-// var token = null;
-// var tokens = [];
+var token = null;
+var tokens = [];
 
-// var start = new Date();
+var start = new Date();
 
-// while ((token = tokenizer.next())) {
-//   // console.log(token);
-//   tokens.push(token);
-// }
+while ((token = tokenizer.next())) {
+  // console.log(token);
+  tokens.push(token);
+}
 
-// var end = new Date();
+var end = new Date();
 
-// console.log('==========================================================');
-// for (var i = 0, len = tokens.length; i < len; i++) {
-//   console.log(tokens[i]);
-// }
-// console.log('==========================================================');
+console.log('==========================================================');
+for (var i = 0, len = tokens.length; i < len; i++) {
+  console.log(tokens[i]);
+}
+console.log('==========================================================');
 
-// console.log('[', tokens.length, ']', 'tokens has been scanned in', end - start, 'ms');
+console.log('[', tokens.length, ']', 'tokens has been scanned in', end - start, 'ms');

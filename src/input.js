@@ -5,6 +5,8 @@
 
 'use strict';
 
+require('colors');
+
 function Input (source) {
   this.source = source;
   this.index = 0;
@@ -54,20 +56,38 @@ Input.prototype = {
 
   info: function (line, column, msg) {
     var lines = this.source.split('\n');
-    var lineStr = line + ' ' + lines[line - 1];
-    var arrowStr = new Array(column + 1).join(' ') + '^';
+    var lineBefore = lines[line - 2];
+    var lineAfter = lines[line];
+    var lineStr = this.getLineNumber(line, line + 1, '>'.red) + lines[line - 1];
+    var arrowStr = this.getLineNumber('', line + 1, '  ') + new Array(column).join(' ') + '^'.red;
 
-    console.log('Error: ' + msg);
-    console.log(lineStr);
-    console.log(arrowStr);
+    // 25 | set $domain hiproxy.org;
+    // 26 | set $string "hiiproxy;
+    //    |                      ^
+    // 27 | domain $domain {
+
+    var error = [
+      'Error: '.bold.red + msg,
+      lineBefore != null ? this.getLineNumber(line - 1, line + 1, ' ') + lineBefore : '',
+      lineStr,
+      arrowStr,
+      lineAfter != null ? this.getLineNumber(line + 1, line + 1, ' ') + lineAfter : ''
+    ];
+
+    console.log(error.join('\n'));
     process.exit();
+  },
+
+  getLineNumber: function (num, max, prefix) {
+    var maxLen = String(max || num).length + 1;
+    return (prefix || '').red + String(Math.pow(10, maxLen) + num).slice(1).replace(/^0+/, ' ').gray + ' | '.gray;
   }
 };
 
 module.exports = Input;
 
 // text
-// var input = new Input('Abcdef 12345');
+// var input = new Input('Abcdef "12345\n24333');
 // console.log(input.peek()); // A
 // console.log(input.peek()); // A
 // console.log(input.next()); // A
