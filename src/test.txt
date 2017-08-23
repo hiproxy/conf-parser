@@ -16,7 +16,7 @@ $domain => {
   set_header Access-Control-Allow-Origin *;
 }
 
-blog.hiproxy.org => {
+domain blog.hiproxy.org {
   set_header Access-Control-Allow-Origin *;
 
   set $node_server 127.0.0.1:3008;

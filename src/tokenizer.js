@@ -29,6 +29,9 @@ Tokenizer.prototype = {
     var input = this.input;
     var char = '';
     var token = null;
+    var startIndex = 0;
+    var startLine = 0;
+    var startColumn = 0;
 
     if (input.eof()) {
       return token;
@@ -37,6 +40,10 @@ Tokenizer.prototype = {
     this.readWhiteSpace();
 
     char = input.peek();
+
+    startIndex = input.index;
+    startColumn = input.column;
+    startLine = input.line;
 
     switch (char) {
       case '\'':
@@ -119,6 +126,12 @@ Tokenizer.prototype = {
         break;
     }
 
+    token.position = {
+      line: [startLine, input.line],
+      column: [startColumn, input.column],
+      index: [startIndex, input.index]
+    };
+
     return token;
   },
 
@@ -188,6 +201,19 @@ Tokenizer.prototype = {
 
   eof: function () {
     return this.input.eof();
+  },
+
+  getTokenInfo: function (token) {
+    var input = this.input;
+    var line = input.line;
+    var column = input.column;
+    var tokenLen = token && token.value ? token.value.length : 0;
+
+    return {
+      startCol: column - tokenLen,
+      endCol: column - 1,
+      line: line
+    };
   }
 };
 
@@ -196,26 +222,26 @@ module.exports = Tokenizer;
 // console.log(tok);
 
 // test
-var file = require('path').join(__dirname, 'test.txt');
-var source = require('fs').readFileSync(file, 'utf-8');
-var tokenizer = new Tokenizer(source);
+// var file = require('path').join(__dirname, 'test.txt');
+// var source = require('fs').readFileSync(file, 'utf-8');
+// var tokenizer = new Tokenizer(source);
 
-var token = null;
-var tokens = [];
+// var token = null;
+// var tokens = [];
 
-var start = new Date();
+// var start = new Date();
 
-while ((token = tokenizer.next())) {
-  // console.log(token);
-  tokens.push(token);
-}
+// while ((token = tokenizer.next())) {
+//   // console.log(token);
+//   tokens.push(token);
+// }
 
-var end = new Date();
+// var end = new Date();
 
-console.log('==========================================================');
-for (var i = 0, len = tokens.length; i < len; i++) {
-  console.log(tokens[i]);
-}
-console.log('==========================================================');
+// console.log('==========================================================');
+// for (var i = 0, len = tokens.length; i < len; i++) {
+//   console.log(tokens[i]);
+// }
+// console.log('==========================================================');
 
-console.log('[', tokens.length, ']', 'tokens has been scanned in', end - start, 'ms');
+// console.log('[', tokens.length, ']', 'tokens has been scanned in', end - start, 'ms');

@@ -145,7 +145,7 @@ Transform.prototype = {
   },
 
   mergeProps: function (target) {
-    var domains = target.domains;
+    var domains = target.domains || [];
 
     domains.forEach(function (domain) {
       // merge variables from `GlobalBlock`
@@ -192,11 +192,12 @@ Transform.prototype = {
 
   flatten: function (tree) {
     var result = {};
-    var variables = tree.variables;
+    var variables = tree.variables || {};
+    var domains = tree.domains || [];
 
     this.parseBaseRule(tree);
 
-    tree.domains.forEach(function (curr) {
+    domains.forEach(function (curr) {
       curr.domain = this.replaceVar(curr.domain, variables);
       result[curr.domain] = curr;
     }, this);
@@ -210,8 +211,8 @@ Transform.prototype = {
     //   "target": "http://hiproxy.org/api/"
     // }
 
-    var domains = tree.domains;
-    var baseRules = tree.baseRules;
+    var domains = tree.domains || [];
+    var baseRules = tree.baseRules || [];
 
     baseRules.forEach(function (rule) {
       var arr = rule.source.split('//');

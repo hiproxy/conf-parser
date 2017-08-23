@@ -50,11 +50,15 @@ Input.prototype = {
   /**
    * print error message
    */
-  error: function (msg) {
-    this.info(this.line, this.column, msg);
+  error: function (msg, line, column) {
+    this._info(line || this.line, column || this.column, msg, true, true);
   },
 
-  info: function (line, column, msg) {
+  info: function (msg, line, column) {
+    this._info(line || this.line, column || this.column, msg);
+  },
+
+  _info: function (line, column, msg, isError, shouldExist) {
     var lines = this.source.split('\n');
     var lineBefore = lines[line - 2];
     var lineAfter = lines[line];
@@ -68,7 +72,7 @@ Input.prototype = {
     // 27 | domain $domain {
 
     var error = [
-      'Error: '.bold.red + msg,
+      isError ? 'Error: '.bold.red + msg : msg,
       '',
       lineBefore != null ? this.getLineNum(line - 1, maxLen, '  ') + lineBefore : '',
       lineStr,
@@ -78,7 +82,10 @@ Input.prototype = {
     ];
 
     console.log(error.join('\n'));
-    process.exit();
+
+    if (shouldExist) {
+      process.exit();
+    }
   },
 
   getLineNum: function (num, length, prefix) {

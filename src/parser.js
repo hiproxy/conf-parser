@@ -27,13 +27,14 @@ Parser.prototype = {
     //   }
     // }
 
-    ast.body = this.parseBlock();
+    ast.body = this.parseBlock(ast.type);
 
     return ast;
   },
 
-  parseBlock: function () {
+  parseBlock: function (parentBlock) {
     var tokenizer = this.tokenizer;
+    var input = this.input;
     var tokens = null;
     var lastToken = null;
     var firstToken = null;
@@ -59,26 +60,35 @@ Parser.prototype = {
       }
 
       if (type === 'block_start') {
-        block = this.parseBlock();
-
+        if (tokens.length < 2) {
+          input.error(
+            'Unexpected ' + (parentBlock === 'GlobalBlock' ? 'DomainBlock' : 'LocationBlock') + ' declaration',
+            (firstToken || lastToken).position.line[0],
+            (firstToken || lastToken).position.column[0]
+          );
+        }
         if (firstToken.type === 'keyword' && firstToken.value === 'location') {
           // location /
+          this.checkBlock('LocationBlock', parentBlock, firstToken.position);
+          block = this.parseBlock('LocationBlock');
           body.push({
             type: 'LocationBlock',
             location: tokens.slice(1).map(function (token) { return token.value; }).join(' '),
-            // params: tokens,
             body: block
           });
         } else if (tokens[1].type === 'arrow') {
           // hiproxy.org => {
+          this.checkBlock('DomainBlock', parentBlock, firstToken.position);
+          block = this.parseBlock('DomainBlock');
           body.push({
             type: 'DomainBlock',
             domain: tokens[0].value,
-            // params: tokens,
             body: block
           });
         } else {
           // domain hiproxy.org {
+          this.checkBlock('DomainBlock', parentBlock, firstToken.position);
+          block = this.parseBlock('DomainBlock');
           body.push({
             type: 'DomainBlock',
             domain: tokens[1].value,
@@ -144,7 +154,11 @@ Parser.prototype = {
           right: params.pop()
         };
       } else {
-        this.input.error('Simple Rule syntax error');
+        this.input.error(
+          'Simple Rule syntax error',
+          tokens[0].position.line[0],
+          tokens[0].position.column[0]
+        );
       }
     }
 
@@ -168,6 +182,21 @@ Parser.prototype = {
 
   isSet: function (token) {
     return token && token.value === 'set';
+  },
+
+  checkBlock: function (curBlock, parentBlock, position) {
+    var input = this.input;
+    var order = ['GlobalBlock', 'DomainBlock', 'LocationBlock'];
+    var curIndex = order.indexOf(curBlock);
+    var parentIndex = order.indexOf(parentBlock);
+
+    if (curIndex - parentIndex !== 1) {
+      input.error(
+        curBlock + ' should be wrapped in ' + order[curIndex - 1] + '.',
+        position.line[0],
+        position.column[0]
+      );
+    }
   }
 };
 
