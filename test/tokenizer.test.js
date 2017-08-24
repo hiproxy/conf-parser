@@ -5,11 +5,17 @@
 'use strict';
 
 var assert = require('assert');
-
 var Tokenizer = require('../src/tokenizer');
 
 describe('# Tokenizer', function () {
   describe('next()', function () {
+    var lastMessage = '';
+
+    before(function () {
+      global.logger = function (message) {
+        lastMessage = message;
+      };
+    });
     it('should get `comment` token rightly', function () {
       var tokenizer = new Tokenizer('# comment text');
       var tok = tokenizer.next();
@@ -44,9 +50,11 @@ describe('# Tokenizer', function () {
     });
 
     it('should get `line_terminal` token rightly', function () {
-      var tokenizer = new Tokenizer('\nsome_thing');
+      var tokenizer = new Tokenizer('\r\nsome_thing');
       var tok = tokenizer.next();
+      var tok1 = tokenizer.next();
       assert.equal('line_terminal', tok.type);
+      assert.equal('line_terminal', tok1.type);
     });
 
     it('should get `string` token rightly (eg: "hiproxy.org")', function () {
@@ -65,6 +73,18 @@ describe('# Tokenizer', function () {
 
       assert.equal('string', tok.type);
       assert.equal('string \'str\'', tok.value);
+    });
+
+    it('should throw error when use different quote', function () {
+      var tokenizer = new Tokenizer('"abc\'');
+      tokenizer.next();
+      assert.notEqual(lastMessage.indexOf('Unterminated string constant'), -1);
+    });
+
+    it('should throw error when get unterminated string', function () {
+      var tokenizer = new Tokenizer('"abc\n');
+      tokenizer.next();
+      assert.notEqual(lastMessage.indexOf('Unterminated string constant'), -1);
     });
 
     it('should get `express_end` token rightly', function () {
@@ -109,6 +129,61 @@ describe('# Tokenizer', function () {
 
       tok = tokenizer.next();
       assert.equal(null, tok);
+    });
+  });
+
+  describe('readWhile()', function () {
+    it('should read character while the condition is `true`', function () {
+      var tokenizer = new Tokenizer('some_word');
+      var str = tokenizer.readWhile(function (char) {
+        return char.match(/[a-zA-Z]/);
+      });
+
+      assert.equal('some', str);
+    });
+
+    it('should stop read character while the condition is `false`', function () {
+      var tokenizer = new Tokenizer('some_word');
+      var str = tokenizer.readWhile(function (char) {
+        return char !== 'm';
+      });
+
+      assert.equal('so', str);
+    });
+
+    it('should end when reach the end', function () {
+      var tokenizer = new Tokenizer('some_word');
+      var str = tokenizer.readWhile(function (char) {
+        return true;
+      });
+
+      assert.equal('some_word', str);
+    });
+  });
+
+  describe('readWhiteSpace()', function () {
+    it('should read all white space character', function () {
+      var tokenizer = new Tokenizer(' \u2028\u2029\u3000\tabc');
+      var str = tokenizer.readWhiteSpace();
+
+      assert.equal(' \u2028\u2029\u3000\t', str);
+    });
+  });
+
+  describe('eof()', function () {
+    it('should return true when reach the end', function () {
+      var tokenizer = new Tokenizer('set');
+      tokenizer.next();
+      tokenizer.next();
+
+      assert.equal(true, tokenizer.eof());
+    });
+
+    it('should return false when NOT reach the end', function () {
+      var tokenizer = new Tokenizer('set $domain hiproxy.org');
+      tokenizer.next();
+
+      assert.equal(false, tokenizer.eof());
     });
   });
 });

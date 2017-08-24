@@ -79,4 +79,28 @@ describe('# Input', function () {
       assert.equal(true, input.eof());
     });
   });
+
+  describe('info() / error()', function () {
+    var lastMessage = '';
+    before(function () {
+      global.logger = function (message) {
+        lastMessage = message;
+      };
+    });
+    it('should print error message', function () {
+      var input = new Input('set $a value-A;\nset $b value-B;');
+      input.error('Unsuppoted character');
+
+      assert.notEqual(lastMessage.indexOf('Error'), -1);
+      assert.notEqual(lastMessage.indexOf('Unsuppoted character'), -1);
+    });
+
+    it('should print info message', function () {
+      var input = new Input('set $a value-A;\nset $b value-B;');
+      input.info('Unsuppoted character');
+
+      assert.equal(lastMessage.indexOf('ERROR'), -1);
+      assert.notEqual(lastMessage.indexOf('Unsuppoted character'), -1);
+    });
+  });
 });

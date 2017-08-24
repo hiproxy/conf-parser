@@ -126,10 +126,17 @@ Tokenizer.prototype = {
         break;
     }
 
-    token.position = {
-      line: [startLine, input.line],
-      column: [startColumn, input.column],
-      index: [startIndex, input.index]
+    token.loc = {
+      start: {
+        line: startLine,
+        column: startColumn,
+        index: startIndex
+      },
+      end: {
+        line: input.line,
+        column: input.column,
+        index: input.index
+      }
     };
 
     return token;
@@ -149,7 +156,7 @@ Tokenizer.prototype = {
   },
 
   readWhiteSpace: function () {
-    this.readWhile(this.isWhitespace);
+    return this.readWhile(this.isWhitespace);
   },
 
   readString: function (quote) {
@@ -196,24 +203,11 @@ Tokenizer.prototype = {
   },
 
   isWhitespace: function (ch) {
-    return ch && ' \t'.indexOf(ch) >= 0;
+    return ch && ' \t\u2028\u2029\u3000'.indexOf(ch) >= 0;
   },
 
   eof: function () {
     return this.input.eof();
-  },
-
-  getTokenInfo: function (token) {
-    var input = this.input;
-    var line = input.line;
-    var column = input.column;
-    var tokenLen = token && token.value ? token.value.length : 0;
-
-    return {
-      startCol: column - tokenLen,
-      endCol: column - 1,
-      line: line
-    };
   }
 };
 

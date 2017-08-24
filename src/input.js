@@ -7,6 +7,8 @@
 
 require('colors');
 
+var env = process.env;
+
 function Input (source) {
   this.source = source;
   this.index = 0;
@@ -54,6 +56,9 @@ Input.prototype = {
     this._info(line || this.line, column || this.column, msg, true, true);
   },
 
+  /**
+   * print info message
+   */
   info: function (msg, line, column) {
     this._info(line || this.line, column || this.column, msg);
   },
@@ -72,7 +77,7 @@ Input.prototype = {
     // 27 | domain $domain {
 
     var error = [
-      isError ? 'Error: '.bold.red + msg : msg,
+      isError ? 'Error: '.bold.red + msg + '.' : msg + '.',
       '',
       lineBefore != null ? this.getLineNum(line - 1, maxLen, '  ') + lineBefore : '',
       lineStr,
@@ -81,9 +86,10 @@ Input.prototype = {
       ''
     ];
 
-    console.log(error.join('\n'));
+    (global.logger || console.log)(error.join('\n'));
 
-    if (shouldExist) {
+    /* istanbul ignore if */
+    if (shouldExist && !env.NPM_TEST) {
       process.exit();
     }
   },

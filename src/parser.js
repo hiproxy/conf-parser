@@ -63,13 +63,13 @@ Parser.prototype = {
         if (tokens.length < 2) {
           input.error(
             'Unexpected ' + (parentBlock === 'GlobalBlock' ? 'DomainBlock' : 'LocationBlock') + ' declaration',
-            (firstToken || lastToken).position.line[0],
-            (firstToken || lastToken).position.column[0]
+            (firstToken || lastToken).loc.start.line,
+            (firstToken || lastToken).loc.start.column
           );
         }
         if (firstToken.type === 'keyword' && firstToken.value === 'location') {
           // location /
-          this.checkBlock('LocationBlock', parentBlock, firstToken.position);
+          this.checkBlock('LocationBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('LocationBlock');
           body.push({
             type: 'LocationBlock',
@@ -78,7 +78,7 @@ Parser.prototype = {
           });
         } else if (tokens[1].type === 'arrow') {
           // hiproxy.org => {
-          this.checkBlock('DomainBlock', parentBlock, firstToken.position);
+          this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
           body.push({
             type: 'DomainBlock',
@@ -87,7 +87,7 @@ Parser.prototype = {
           });
         } else {
           // domain hiproxy.org {
-          this.checkBlock('DomainBlock', parentBlock, firstToken.position);
+          this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
           body.push({
             type: 'DomainBlock',
@@ -156,8 +156,8 @@ Parser.prototype = {
       } else {
         this.input.error(
           'Simple Rule syntax error',
-          tokens[0].position.line[0],
-          tokens[0].position.column[0]
+          tokens[0].loc.start.line,
+          tokens[0].loc.start.column
         );
       }
     }
@@ -198,7 +198,7 @@ Parser.prototype = {
   //   return token && token.value === 'proxy_pass';
   // },
 
-  checkBlock: function (curBlock, parentBlock, position) {
+  checkBlock: function (curBlock, parentBlock, loc) {
     var input = this.input;
     var order = ['GlobalBlock', 'DomainBlock', 'LocationBlock'];
     var curIndex = order.indexOf(curBlock);
@@ -207,8 +207,8 @@ Parser.prototype = {
     if (curIndex - parentIndex !== 1) {
       input.error(
         curBlock + ' should be wrapped in ' + order[curIndex - 1] + '.',
-        position.line[0],
-        position.column[0]
+        loc.start.line,
+        loc.start.column
       );
     }
   }
