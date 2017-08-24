@@ -17,15 +17,6 @@ Parser.prototype = {
       type: 'GlobalBlock',
       body: []
     };
-    // var tokenizer = this.tokenizer;
-    // var statement = null;
-
-    // while (!tokenizer.eof()) {
-    //   statement = this.parseStatement();
-    //   if (statement) {
-    //     ast.body.push(statement);
-    //   }
-    // }
 
     ast.body = this.parseBlock(ast.type);
 
