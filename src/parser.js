@@ -172,6 +172,16 @@ Parser.prototype = {
       };
     }
 
+    // if (this.isProxyPass(name)) {
+    //   return {
+    //     type: 'VariableDeclaration',
+    //     declaration: {
+    //       id: '$proxy_pass',
+    //       value: params
+    //     }
+    //   };
+    // }
+
     return {
       type: 'CallExpression',
       directive: name ? name.value : '[Should throw a error or not?]',
@@ -183,6 +193,10 @@ Parser.prototype = {
   isSet: function (token) {
     return token && token.value === 'set';
   },
+
+  // isProxyPass: function (token) {
+  //   return token && token.value === 'proxy_pass';
+  // },
 
   checkBlock: function (curBlock, parentBlock, position) {
     var input = this.input;

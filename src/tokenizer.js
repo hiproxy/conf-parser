@@ -178,7 +178,7 @@ Tokenizer.prototype = {
 
   readWord: function () {
     return this.readWhile(function (char) {
-      return ' \n\r\t;'.indexOf(char) === -1;
+      return ' \n\r\t;{}'.indexOf(char) === -1;
     });
   },
 
@@ -221,7 +221,7 @@ module.exports = Tokenizer;
 
 // console.log(tok);
 
-// test
+// // test
 // var file = require('path').join(__dirname, 'test.txt');
 // var source = require('fs').readFileSync(file, 'utf-8');
 // var tokenizer = new Tokenizer(source);

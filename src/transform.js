@@ -262,15 +262,21 @@ Transform.prototype = {
         return this.replaceVar(str, source);
       }
 
-      return str.replace(/\$[\w\d_]+/g, function (match) {
-        var val = source[match];
+      // return str.replace(/\$[\w\d_-]+/g, function (match) {
+      //   var val = source[match];
 
-        if (val !== undefined) {
-          return val;
-        } else {
-          return match;
-        }
-      });
+      //   console.log('match', match);
+
+      //   if (val !== undefined) {
+      //     return val;
+      //   } else {
+      //     return match;
+      //   }
+      // });
+      for (var key in source) {
+        str = str.replace(new RegExp(key.replace('$', '\\$'), 'g'), source[key]);
+      }
+      return str;
     }.bind(this);
 
     if (strType === 'string') {
