@@ -137,7 +137,7 @@ Parser.prototype = {
     return tokens;
   },
 
-  parseCall (tokens) {
+  parseCall: function (tokens) {
     /* istanbul ignore if */
     if (tokens.length === 0) {
       return null;
