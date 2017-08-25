@@ -32,7 +32,7 @@
   "config": {
     "ghooks": {
       "pre-commit": "npm run semistandard",
-      "pre-push": ""
+      "pre-push": "npm test"
     }
   },
   "author": "zdying",
