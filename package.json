@@ -19,6 +19,9 @@
     "rewrite",
     "parser"
   ],
+  "dependencies": {
+    "colors": "^1.1.2"
+  },
   "devDependencies": {
     "ghooks": "^2.0.0",
     "mocha": "^3.2.0",
