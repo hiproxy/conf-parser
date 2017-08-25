@@ -6,7 +6,8 @@
   "scripts": {
     "test": "export NPM_TEST=true && nyc mocha test/**/*.test.js --timeout 5000",
     "report": "npm test && nyc report --reporter=lcov --reporter=html",
-    "semistandard": "semistandard"
+    "semistandard": "semistandard",
+    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
   "repository": {
     "type": "git",
