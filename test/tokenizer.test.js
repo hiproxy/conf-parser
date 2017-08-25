@@ -59,11 +59,11 @@ describe('# Tokenizer', function () {
 
     it('should get `string` token rightly (eg: "hiproxy.org")', function () {
       // input: "string \"str\""
-      var tokenizer = new Tokenizer('"string \\"str\\""');
+      var tokenizer = new Tokenizer('"{string \\"str\\""');
       var tok = tokenizer.next();
 
       assert.equal('string', tok.type);
-      assert.equal('string "str"', tok.value);
+      assert.equal('{string "str"', tok.value);
     });
 
     it('should get `string` token rightly (eg: \'hiproxy.org\')', function () {
@@ -125,6 +125,14 @@ describe('# Tokenizer', function () {
 
     it('should return `null` then reach the end of input strem', function () {
       var tokenizer = new Tokenizer('some_word');
+      var tok = tokenizer.next(); // word: some_word
+
+      tok = tokenizer.next();
+      assert.equal(null, tok);
+    });
+
+    it('should return `null` then input strem end with white space', function () {
+      var tokenizer = new Tokenizer('some_word ');
       var tok = tokenizer.next(); // word: some_word
 
       tok = tokenizer.next();

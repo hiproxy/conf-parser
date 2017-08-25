@@ -9,7 +9,7 @@ set $test $api.example.com;
 set $id 1234567;
 
 # standard rewrite url
-$domain {
+$domain => {
   set $mock_user user_$id;
   set_header Host $domain;
   set_header UserID $mock_user;

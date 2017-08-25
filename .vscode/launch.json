@@ -7,6 +7,12 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Tokenizer",
+      "program": "${workspaceRoot}/src/tokenizer.js"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Parser",
       "program": "${workspaceRoot}/src/parser.js"
     },

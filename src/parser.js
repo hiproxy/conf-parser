@@ -37,14 +37,24 @@ Parser.prototype = {
     while (!tokenizer.eof()) {
       tokens = this.readStatementTokens();
 
+      /* istanbul ignore if */
       if (tokens.length === 0) {
         continue;
       }
 
-      lastToken = tokens.pop();
+      lastToken = tokens[tokens.length - 1];
       firstToken = tokens[0];
 
       type = lastToken.type;
+
+      if (
+        type === 'block_start' ||
+        type === 'block_end' ||
+        type === 'line_terminal' ||
+        type === 'express_end'
+      ) {
+        tokens.pop();
+      }
 
       if (type === 'block_end') {
         break;
@@ -58,6 +68,7 @@ Parser.prototype = {
             (firstToken || lastToken).loc.start.column
           );
         }
+
         if (firstToken.type === 'keyword' && firstToken.value === 'location') {
           // location /
           this.checkBlock('LocationBlock', parentBlock, firstToken.loc);
@@ -67,7 +78,7 @@ Parser.prototype = {
             location: tokens.slice(1).map(function (token) { return token.value; }).join(' '),
             body: block
           });
-        } else if (tokens[1].type === 'arrow') {
+        } else if (tokens[1] && tokens[1].type === 'arrow') {
           // hiproxy.org => {
           this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
@@ -76,7 +87,7 @@ Parser.prototype = {
             domain: tokens[0].value,
             body: block
           });
-        } else {
+        } else if (tokens[1]) {
           // domain hiproxy.org {
           this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
@@ -122,13 +133,16 @@ Parser.prototype = {
         break;
       }
     }
+
     return tokens;
   },
 
   parseCall (tokens) {
+    /* istanbul ignore if */
     if (tokens.length === 0) {
       return null;
     }
+
     var values = tokens.map(function (token) {
       return token.value;
     });
@@ -172,11 +186,9 @@ Parser.prototype = {
     //     }
     //   };
     // }
-
     return {
       type: 'CallExpression',
-      directive: name ? name.value : '[Should throw a error or not?]',
-      // directive: name.value,
+      directive: name.value,
       arguments: params
     };
   },
@@ -197,7 +209,7 @@ Parser.prototype = {
 
     if (curIndex - parentIndex !== 1) {
       input.error(
-        curBlock + ' should be wrapped in ' + order[curIndex - 1] + '.',
+        curBlock + ' should be wrapped in ' + order[curIndex - 1],
         loc.start.line,
         loc.start.column
       );
@@ -207,7 +219,7 @@ Parser.prototype = {
 
 module.exports = Parser;
 
-// test
+// // test
 // var file = require('path').join(__dirname, 'test.txt');
 // var source = require('fs').readFileSync(file, 'utf-8');
 // var parser = new Parser(source);

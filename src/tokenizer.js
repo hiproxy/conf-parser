@@ -46,6 +46,8 @@ Tokenizer.prototype = {
     startLine = input.line;
 
     switch (char) {
+      case '':
+        break;
       case '\'':
       case '"':
         input.next();
@@ -126,18 +128,21 @@ Tokenizer.prototype = {
         break;
     }
 
-    token.loc = {
-      start: {
-        line: startLine,
-        column: startColumn,
-        index: startIndex
-      },
-      end: {
-        line: input.line,
-        column: input.column,
-        index: input.index
-      }
-    };
+    if (token) {
+      token.loc = {
+        start: {
+          line: startLine,
+          column: startColumn,
+          index: startIndex
+        },
+        end: {
+          line: input.line,
+          column: input.column,
+          index: input.index
+        },
+        toJSON: /* istanbul ignore next */function () { return undefined; }
+      };
+    }
 
     return token;
   },
