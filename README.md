@@ -5,3 +5,9 @@
 
 
 hiproxy rewrite config file parser
+
+## install
+
+```
+npm install hiproxy-conf-parser --save
+```

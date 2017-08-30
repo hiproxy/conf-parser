@@ -3,9 +3,7 @@
  * @author zdying
  */
 
-function Transform () {
-
-}
+function Transform () {}
 
 Transform.prototype = {
   constructor: Transform,
@@ -81,7 +79,7 @@ Transform.prototype = {
     });
     var obj = {
       directive: directive,
-      params: params
+      arguments: params
     };
 
     if (Array.isArray(target.directives)) {
@@ -95,6 +93,7 @@ Transform.prototype = {
     var domain = {
       domain: statement.domain,
       directives: [],
+      variables: {},
       locations: []
     };
 
@@ -110,7 +109,8 @@ Transform.prototype = {
   transformLocation: function (target, statement) {
     var location = {
       location: statement.location,
-      directives: []
+      directives: [],
+      variables: {}
     };
 
     var obj = this._transform(statement, location);
@@ -139,7 +139,7 @@ Transform.prototype = {
       });
     }
 
-    value = this.replaceVar(value, target.variables);
+    value = Transform.replaceVar(value, target.variables);
 
     target.variables[id] = value;
   },
@@ -152,45 +152,45 @@ Transform.prototype = {
       this.merge(domain, target);
 
       // replace variables
-      domain.variables = this.replaceVar(domain.variables, domain.variables);
-      this.replaceVar(domain, domain.variables, ['variables', 'locations']);
+      domain.variables = Transform.replaceVar(domain.variables, domain.variables);
+      Transform.replaceVar(domain, domain.variables, ['variables', 'locations']);
 
       domain.locations.forEach(function (location) {
         // merge variables from `DomainBlock`
         this.merge(location, domain);
 
         // replace variables
-        location.variables = this.replaceVar(location.variables, location.variables);
-        this.replaceVar(location, location.variables);
+        location.variables = Transform.replaceVar(location.variables, location.variables);
+        Transform.replaceVar(location, location.variables);
       }, this);
     }, this);
   },
 
   merge: function (current, parent) {
     ['directives', 'variables'].forEach(function (key) {
-      var props = parent[key];
+      var parentProps = parent[key];
       var currProps = current[key];
       var prop = '';
 
-      if (!props) {
+      if (!parentProps) {
         return;
       }
 
-      currProps = currProps || (current[key] = {});
+      currProps = currProps || (current[key] = (key === 'directives' ? {} : []));
 
-      if (Array.isArray(props)) {
-        current[key] = props.concat(currProps);
-      } else if (typeof props === 'object') {
-        for (prop in props) {
+      if (Array.isArray(parentProps)) {
+        current[key] = parentProps.concat(currProps);
+      } else if (typeof parentProps === 'object') {
+        for (prop in parentProps) {
           if (!(prop in currProps)) {
-            currProps[prop] = props[prop];
+            currProps[prop] = parentProps[prop];
           }
         }
       }
     });
   },
 
-  flatten: function (tree) {
+  flatten: function (tree, filePath) {
     var result = {};
     var variables = tree.variables || {};
     var domains = tree.domains || [];
@@ -198,7 +198,8 @@ Transform.prototype = {
     this.parseBaseRule(tree);
 
     domains.forEach(function (curr) {
-      curr.domain = this.replaceVar(curr.domain, variables);
+      curr.domain = Transform.replaceVar(curr.domain, variables);
+      // curr.filePath = filePath;
       result[curr.domain] = curr;
     }, this);
 
@@ -222,93 +223,79 @@ Transform.prototype = {
 
       var domain = {
         domain: host,
+        directives: [],
+        variables: {},
         locations: [
           {
             location: '/' + path,
-            directives: [
-              {
-                'directive': 'proxy_pass',
-                'params': [rule.target]
-              }
-            ]
+            isBaseRule: true,
+            variables: {
+              proxy_pass: rule.target
+            },
+            directives: []
           }
         ]
       };
 
       domains.push(domain);
     });
-  },
-
-  /**
-   * Replace variables in a value
-   *
-   * @param {String|Array|Object} str
-   * @param {Object} source
-   * @param {Array} [exclude]
-   * @returns {*}
-   */
-  replaceVar: function (str, source, exclude) {
-    if (str == null) {
-      return str;
-    }
-
-    if (!Array.isArray(exclude)) {
-      exclude = [];
-    }
-
-    var strType = typeof str;
-    var replace = function (str) {
-      if (typeof str !== 'string') {
-        return this.replaceVar(str, source);
-      }
-
-      // return str.replace(/\$[\w\d_-]+/g, function (match) {
-      //   var val = source[match];
-
-      //   console.log('match', match);
-
-      //   if (val !== undefined) {
-      //     return val;
-      //   } else {
-      //     return match;
-      //   }
-      // });
-      for (var key in source) {
-        str = str.replace(new RegExp(key.replace('$', '\\$'), 'g'), source[key]);
-      }
-      return str;
-    }.bind(this);
-
-    if (strType === 'string') {
-      str = replace(str);
-    } else if (strType === 'array') {
-      str = str.map(function (string) {
-        return replace(string);
-      });
-    } else if (strType === 'object') {
-      for (var strKey in str) {
-        if (exclude.indexOf(strKey) === -1) {
-          str[strKey] = replace(str[strKey]);
-        }
-      }
-    }
-
-    return str;
-  },
-
-  resolveVariables: function (tree) {
-
   }
+};
+
+/**
+* Replace variables in a value
+*
+* @param {String|Array|Object} str
+* @param {Object} source
+* @param {Array} [exclude]
+* @returns {*}
+*/
+Transform.replaceVar = function (str, source, exclude) {
+  if (str == null) {
+    return str;
+  }
+
+  if (!Array.isArray(exclude)) {
+    exclude = [];
+  }
+
+  var strType = typeof str;
+  var replace = function (str) {
+    if (typeof str !== 'string') {
+      return Transform.replaceVar(str, source);
+    }
+
+    for (var key in source) {
+      str = str.replace(new RegExp(key.replace('$', '\\$'), 'g'), source[key]);
+    }
+    return str;
+  };
+
+  if (strType === 'string') {
+    str = replace(str);
+  } else if (strType === 'array') {
+    str = str.map(function (string) {
+      return replace(string);
+    });
+  } else if (strType === 'object') {
+    for (var strKey in str) {
+      if (exclude.indexOf(strKey) === -1) {
+        str[strKey] = replace(str[strKey]);
+      }
+    }
+  }
+
+  return str;
 };
 
 module.exports = Transform;
 
-var file = require('path').join(__dirname, 'test.txt');
-var source = require('fs').readFileSync(file, 'utf-8');
-var Parser = require('./parser.js');
-var parser = new Parser(source);
-var ast = parser.parseToplevel();
+// var file = require('path').join(__dirname, 'test.txt');
+// var source = require('fs').readFileSync(file, 'utf-8');
+// var Parser = require('./parser.js');
+// var parser = new Parser(source);
+// var ast = parser.parseToplevel();
 
-var res = new Transform().transform(ast);
+// var res = new Transform().transform(ast);
 
-console.log(JSON.stringify(res, null, 2));
+// console.log(JSON.stringify(res, null, 2));

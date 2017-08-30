@@ -3,20 +3,9 @@
  * @author zdying
  */
 
-function Parser () {
-
-}
-
-Parser.prototype = {
-  constructor: Parser,
-
-  parse: function () {
-
-  },
-
-  tokenizer: function () {
-
-  }
+module.exports = {
+  Input: require('./input'),
+  Parser: require('./parser'),
+  Tokenizer: require('./tokenizer'),
+  Transform: require('./transform')
 };
-
-module.exports = Parser;
