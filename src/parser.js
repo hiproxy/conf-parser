@@ -147,7 +147,13 @@ Parser.prototype = {
       /* istanbul ignore else */
       if (tokens[2]) {
         value = tokens[2].value;
-        value = value.replace(/^\/\/|\/\/$/g, '/');
+
+        // if start with '//' and end with '/'
+        // remove the FIRST and the LAST '/'
+        if (value.indexOf('//') === 0 && value.charAt(value.length - 1) === '/') {
+          value = value.replace(/^\/|\/$/g, '');
+        }
+
         return new RegExp(value);
       } else {
         this.input.error(

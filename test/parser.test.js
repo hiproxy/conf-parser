@@ -301,6 +301,27 @@ describe('# Parser', function () {
       assert.equal(false, locationBlock.location.test('api'));
     });
 
+    it('parse regexp location (eg: //(ucenter|api)/', function () {
+      var body = getBody('domain hiproxy.org { location ~ //(ucenter|api)/ { } }');
+      var locationBlock = body[0].body[0];
+
+      assert.equal('[object RegExp]', ({}).toString.call(locationBlock.location));
+      assert.equal(true, locationBlock.location.test('/ucenter/'));
+      assert.equal(true, locationBlock.location.test('/api/'));
+      assert.equal(true, locationBlock.location.test('/api1/'));
+      assert.equal(true, locationBlock.location.test('/api'));
+      assert.equal(false, locationBlock.location.test('api'));
+    });
+
+    it('parse regexp location (eg: //(ucenter|api)', function () {
+      var body = getBody('domain hiproxy.org { location ~ //(ucenter|api)/ { } }');
+      var locationBlock = body[0].body[0];
+
+      assert.equal('[object RegExp]', ({}).toString.call(locationBlock.location));
+      assert.equal(true, locationBlock.location.test('//ucenter'));
+      assert.equal(true, locationBlock.location.test('//api'));
+    });
+
     it('parse regexp location (eg: /(ucenter|api)/', function () {
       var body = getBody('domain hiproxy.org { location ~ /(ucenter|api)/ { } }');
       var locationBlock = body[0].body[0];
