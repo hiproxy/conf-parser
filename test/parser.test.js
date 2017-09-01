@@ -281,6 +281,29 @@ describe('# Parser', function () {
       assert.equal(1, locationBody1.length);
       testVariableDeclaration(locationBody1[0], '$id', '45678');
     });
+
+    it('parse string location', function () {
+      var body = getBody('domain hiproxy.org { location /a/b/c { } }');
+      var locationBlock = body[0].body[0];
+
+      assert.equal('/a/b/c', locationBlock.location);
+    });
+
+    it('parse regexp location (eg: //(ucenter|api)//', function () {
+      var body = getBody('domain hiproxy.org { location ~ //(ucenter|api)// { } }');
+      var locationBlock = body[0].body[0];
+
+      assert.equal('[object RegExp]', ({}).toString.call(locationBlock.location));
+      assert.equal('\\/(ucenter|api)\\/', locationBlock.location.source);
+    });
+
+    it('parse regexp location (eg: /(ucenter|api)/', function () {
+      var body = getBody('domain hiproxy.org { location ~ /(ucenter|api)/ { } }');
+      var locationBlock = body[0].body[0];
+
+      assert.equal('[object RegExp]', ({}).toString.call(locationBlock.location));
+      assert.equal('\\/(ucenter|api)\\/', locationBlock.location.source);
+    });
   });
 
   describe('block check', function () {

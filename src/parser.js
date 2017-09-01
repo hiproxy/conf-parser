@@ -62,7 +62,7 @@ Parser.prototype = {
 
       if (type === 'block_start') {
         if (tokens.length < 2) {
-          input.error(
+          return input.error(
             'Unexpected ' + (parentBlock === 'GlobalBlock' ? 'DomainBlock' : 'LocationBlock') + ' declaration',
             (firstToken || lastToken).loc.start.line,
             (firstToken || lastToken).loc.start.column
@@ -75,7 +75,7 @@ Parser.prototype = {
           block = this.parseBlock('LocationBlock');
           body.push({
             type: 'LocationBlock',
-            location: tokens.slice(1).map(function (token) { return token.value; }).join(' '),
+            location: this.getLocationValue(tokens),
             body: block
           });
         } else if (tokens[1] && tokens[1].type === 'arrow') {
@@ -137,6 +137,28 @@ Parser.prototype = {
     return tokens;
   },
 
+  getLocationValue: function (tokens) {
+    var value = tokens[1].value;
+    var isRegExp = value.indexOf('~') !== -1;
+
+    if (!isRegExp) {
+      return value;
+    } else {
+      /* istanbul ignore else */
+      if (tokens[2]) {
+        value = tokens[2].value;
+        value = value.replace(/^\/\/|\/\/$/g, '/');
+        return new RegExp(value);
+      } else {
+        this.input.error(
+          'Invalid RegExp location config, Regexp location format: ' + '`location ~ /(user|info)/(.*)`'.bold.green,
+          tokens[1].loc.start.line,
+          tokens[1].loc.start.column + 1
+        );
+      }
+    }
+  },
+
   parseCall: function (tokens) {
     /* istanbul ignore if */
     if (tokens.length === 0) {
@@ -177,15 +199,6 @@ Parser.prototype = {
       };
     }
 
-    // if (this.isProxyPass(name)) {
-    //   return {
-    //     type: 'VariableDeclaration',
-    //     declaration: {
-    //       id: '$proxy_pass',
-    //       value: params
-    //     }
-    //   };
-    // }
     return {
       type: 'CallExpression',
       directive: name.value,
