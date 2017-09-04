@@ -12,8 +12,8 @@ var Input = require('./input');
  *
  * @param {any} source
  */
-function Tokenizer (source) {
-  this.input = new Input(source);
+function Tokenizer (source, filePath) {
+  this.input = new Input(source, filePath);
 }
 
 Tokenizer.prototype = {

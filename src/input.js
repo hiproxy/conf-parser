@@ -9,8 +9,9 @@ require('colors');
 
 var env = process.env;
 
-function Input (source) {
+function Input (source, filePath) {
   this.source = source;
+  this.filePath = filePath;
   this.index = 0;
   this.column = 0;
   this.line = 1;
@@ -77,7 +78,7 @@ Input.prototype = {
     // 27 | domain $domain {
 
     var error = [
-      isError ? 'Error: '.bold.red + msg + '.' : msg + '.',
+      isError ? 'Error: '.bold.red + (msg + '.').red : msg + '.',
       '',
       lineBefore != null ? this.getLineNum(line - 1, maxLen, '  ') + lineBefore : '',
       lineStr,
@@ -85,6 +86,10 @@ Input.prototype = {
       lineAfter != null ? this.getLineNum(line + 1, maxLen, '  ') + lineAfter : '',
       ''
     ];
+
+    if (this.filePath) {
+      error.push(('In ' + this.filePath.underline.bold + ' (line:' + line + ', column:' + column + ')').red);
+    }
 
     (global.logger || console.log)(error.join('\n'));
 

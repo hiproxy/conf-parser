@@ -5,8 +5,8 @@
 
 var Tokenizer = require('./tokenizer');
 
-function Parser (source) {
-  this.tokenizer = new Tokenizer(source);
+function Parser (source, filePath) {
+  this.tokenizer = new Tokenizer(source, filePath);
   this.input = this.tokenizer.input;
 }
 
@@ -241,7 +241,7 @@ module.exports = Parser;
 // // test
 // var file = require('path').join(__dirname, 'test.txt');
 // var source = require('fs').readFileSync(file, 'utf-8');
-// var parser = new Parser(source);
+// var parser = new Parser(source, file);
 // var ast = parser.parseToplevel();
 
 // console.log(JSON.stringify(ast, null, 2));
