@@ -102,5 +102,14 @@ describe('# Input', function () {
       assert.equal(lastMessage.indexOf('ERROR'), -1);
       assert.notEqual(lastMessage.indexOf('Unsuppoted character'), -1);
     });
+
+    it('should print file path', function () {
+      var input = new Input('set $a value-A;\nset $b value-B;', './file/path/config');
+      input.info('Unsuppoted character');
+
+      assert.equal(lastMessage.indexOf('ERROR'), -1);
+      assert.notEqual(lastMessage.indexOf('Unsuppoted character'), -1);
+      assert.notEqual(lastMessage.indexOf('./file/path/config'), -1);
+    });
   });
 });
