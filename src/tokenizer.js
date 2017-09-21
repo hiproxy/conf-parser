@@ -154,7 +154,7 @@ Tokenizer.prototype = {
 
     while (!input.eof() && pattern(input.peek())) {
       char = input.next();
-      result += char !== '\\' ? char : '';
+      result += char;
     }
 
     return result;

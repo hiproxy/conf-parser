@@ -63,7 +63,7 @@ describe('# Tokenizer', function () {
       var tok = tokenizer.next();
 
       assert.equal('string', tok.type);
-      assert.equal('{string "str"', tok.value);
+      assert.equal('{string \\"str\\"', tok.value);
     });
 
     it('should get `string` token rightly (eg: \'hiproxy.org\')', function () {
@@ -72,7 +72,15 @@ describe('# Tokenizer', function () {
       var tok = tokenizer.next();
 
       assert.equal('string', tok.type);
-      assert.equal('string \'str\'', tok.value);
+      assert.equal('string \\\'str\\\'', tok.value);
+    });
+
+    it('should get the escape character', function () {
+      var tokenizer = new Tokenizer('/\\/local\\/(.*)(\\?(.*))?/');
+      var tok = tokenizer.next();
+
+      assert.equal('word', tok.type);
+      assert.equal('/\\/local\\/(.*)(\\?(.*))?/', tok.value);
     });
 
     it('should throw error when use different quote', function () {
