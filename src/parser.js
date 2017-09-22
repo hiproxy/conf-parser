@@ -150,7 +150,7 @@ Parser.prototype = {
 
         // if start with '//' and end with '/'
         // remove the FIRST and the LAST '/'
-        if (value.indexOf('//') === 0 && value.charAt(value.length - 1) === '/') {
+        if (/\/\\?\//.test(value) && value.charAt(value.length - 1) === '/') {
           value = value.replace(/^\/|\/$/g, '');
         }
 
