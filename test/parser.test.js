@@ -347,6 +347,36 @@ describe('# Parser', function () {
     });
   });
 
+  describe('multiple domain', function () {
+    it('multiple domain in one block (eg: domain x y z {})', function () {
+      var body = getBody('domain hiproxy.org user.hiproxy.org { location ~ /(ucenter|api)/ { } }');
+      var domain = body[0];
+
+      assert.deepEqual(['hiproxy.org', 'user.hiproxy.org'], domain.domain);
+    });
+
+    it('multiple domain in one block (eg: x y z => {})', function () {
+      var body = getBody('hiproxy.org user.hiproxy.org => { location ~ /(ucenter|api)/ { } }');
+      var domain = body[0];
+
+      assert.deepEqual(['hiproxy.org', 'user.hiproxy.org'], domain.domain);
+    });
+
+    it('one domain in one block (eg: domain x {})', function () {
+      var body = getBody('domain hiproxy.org { location ~ /(ucenter|api)/ { } }');
+      var domain = body[0];
+
+      assert.deepEqual(['hiproxy.org'], domain.domain);
+    });
+
+    it('one domain in one block (eg: x => {})', function () {
+      var body = getBody('hiproxy.org => { location ~ /(ucenter|api)/ { } }');
+      var domain = body[0];
+
+      assert.deepEqual(['hiproxy.org'], domain.domain);
+    });
+  });
+
   describe('block check', function () {
     var lastMessage = '';
 
