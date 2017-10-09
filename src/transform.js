@@ -200,7 +200,13 @@ Transform.prototype = {
     domains.forEach(function (curr) {
       curr.domain = Transform.replaceVar(curr.domain, variables);
       // curr.filePath = filePath;
-      result[curr.domain] = curr;
+      if (typeof curr.domain === 'string') {
+        result[curr.domain] = curr;
+      } else if (Array.isArray(curr.domain)) {
+        curr.domain.forEach(function (domain) {
+          result[domain] = curr;
+        });
+      }
     }, this);
 
     return result;

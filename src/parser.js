@@ -29,6 +29,7 @@ Parser.prototype = {
     var tokens = null;
     var lastToken = null;
     var firstToken = null;
+    var domainValue;
     var type = '';
     var body = [];
     var block = null;
@@ -78,22 +79,28 @@ Parser.prototype = {
             location: this.getLocationValue(tokens),
             body: block
           });
-        } else if (tokens[1] && tokens[1].type === 'arrow') {
+        } else if (tokens[tokens.length - 1].type === 'arrow') {
           // hiproxy.org => {
           this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
+          domainValue = tokens.slice(0, tokens.length - 1).map(function (token) {
+            return token.value;
+          });
           body.push({
             type: 'DomainBlock',
-            domain: tokens[0].value,
+            domain: domainValue,
             body: block
           });
         } else if (tokens[1]) {
           // domain hiproxy.org {
           this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
+          domainValue = tokens.slice(1).map(function (token) {
+            return token.value;
+          });
           body.push({
             type: 'DomainBlock',
-            domain: tokens[1].value,
+            domain: domainValue,
             body: block
           });
         }
