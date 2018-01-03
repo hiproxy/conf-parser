@@ -83,9 +83,7 @@ Parser.prototype = {
           // hiproxy.org => {
           this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
-          domainValue = tokens.slice(0, tokens.length - 1).map(function (token) {
-            return token.value;
-          });
+          domainValue = this._getDomainValue(tokens.slice(0, tokens.length - 1));
           body.push({
             type: 'DomainBlock',
             domain: domainValue,
@@ -95,9 +93,7 @@ Parser.prototype = {
           // domain hiproxy.org {
           this.checkBlock('DomainBlock', parentBlock, firstToken.loc);
           block = this.parseBlock('DomainBlock');
-          domainValue = tokens.slice(1).map(function (token) {
-            return token.value;
-          });
+          domainValue = this._getDomainValue(tokens.slice(1));
           body.push({
             type: 'DomainBlock',
             domain: domainValue,
@@ -111,6 +107,20 @@ Parser.prototype = {
     }
 
     return body;
+  },
+
+  _getDomainValue: function (tokens) {
+    var domainValue = [];
+
+    tokens.forEach(function (token) {
+      var val = token.value.replace(/^[,\s]+|[,\s]+$/g, '');
+
+      if (val) {
+        domainValue = domainValue.concat(val.split(/,+/));
+      }
+    });
+
+    return domainValue;
   },
 
   readStatementTokens: function () {
@@ -245,10 +255,10 @@ Parser.prototype = {
 
 module.exports = Parser;
 
-// // test
-// var file = require('path').join(__dirname, 'test.txt');
-// var source = require('fs').readFileSync(file, 'utf-8');
-// var parser = new Parser(source, file);
-// var ast = parser.parseToplevel();
+// test
+var file = require('path').join(__dirname, 'test.txt');
+var source = require('fs').readFileSync(file, 'utf-8');
+var parser = new Parser(source, file);
+var ast = parser.parseToplevel();
 
-// console.log(JSON.stringify(ast, null, 2));
+console.log(JSON.stringify(ast, null, 2));
