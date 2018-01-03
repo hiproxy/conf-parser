@@ -256,9 +256,9 @@ Parser.prototype = {
 module.exports = Parser;
 
 // test
-var file = require('path').join(__dirname, 'test.txt');
-var source = require('fs').readFileSync(file, 'utf-8');
-var parser = new Parser(source, file);
-var ast = parser.parseToplevel();
+// var file = require('path').join(__dirname, 'test.txt');
+// var source = require('fs').readFileSync(file, 'utf-8');
+// var parser = new Parser(source, file);
+// var ast = parser.parseToplevel();
 
-console.log(JSON.stringify(ast, null, 2));
+// console.log(JSON.stringify(ast, null, 2));
