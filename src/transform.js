@@ -204,7 +204,7 @@ Transform.prototype = {
         result[curr.domain] = curr;
       } else if (Array.isArray(curr.domain)) {
         curr.domain.forEach(function (domain) {
-          result[domain] = curr;
+          result[domain] = clone(curr);
         });
       }
     }, this);
@@ -293,6 +293,36 @@ Transform.replaceVar = function (str, source, exclude) {
 
   return str;
 };
+
+function type (obj) {
+  return ({}).toString.call(obj)
+    .replace(/\[object (\w+)\]/, '$1')
+    .toLowerCase();
+}
+
+function clone (obj, blackList) {
+  if (obj == null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  var _type = type(obj);
+
+  if (_type === 'regexp') {
+    return new RegExp(obj.source);
+  }
+
+  var temp = new obj.constructor();
+
+  blackList = !Array.isArray(blackList) ? [] : blackList;
+
+  for (var key in obj) {
+    if (blackList.indexOf(key) === -1 && obj.hasOwnProperty(key)) {
+      temp[key] = clone(obj[key]);
+    }
+  }
+
+  return temp;
+}
 
 module.exports = Transform;
 
