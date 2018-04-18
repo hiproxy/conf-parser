@@ -257,7 +257,7 @@ Transform.prototype = {
 * @returns {*}
 */
 Transform.replaceVar = function (str, source, exclude) {
-  if (str == null) {
+  if (str == null || source == null) {
     return str;
   }
 
@@ -266,16 +266,22 @@ Transform.replaceVar = function (str, source, exclude) {
   }
 
   var strType = typeof str;
+  var variables = Object.keys(source);
   var replace = function (str) {
     if (typeof str !== 'string') {
       return Transform.replaceVar(str, source);
     }
 
-    for (var key in source) {
+    variables.forEach(function (key) {
       str = str.replace(new RegExp(key.replace('$', '\\$'), 'g'), source[key]);
-    }
+    });
+
     return str;
   };
+
+  variables = variables.sort(function (a, b) {
+    return b.length - a.length;
+  });
 
   if (strType === 'string') {
     str = replace(str);
